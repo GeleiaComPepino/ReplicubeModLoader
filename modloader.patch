@@ -1,0 +1,2342 @@
+diff --git a/GDSripts/Main.gd b/GDSripts/Main.gd
+index d9e0f85..2cdb2c5 100644
+--- a/GDSripts/Main.gd
++++ b/GDSripts/Main.gd
+@@ -1,13 +1,12 @@
+ extends Node
+ class_name Main
+-
+-const VERSION_STRING = "Version 13B (April 2025)"
+-const VERSION_STRING_DEMO = "Demo Version 11B"
++const VERSION_STRING = "Modded Version 12B (March 2025)"
++const VERSION_STRING_DEMO = "Modded Demo Version 10B"
+ const IS_PLAYTEST: = true
+ 
+ const FEATURE_DEMO = "DEMO"
+-const EDITOR_IS_DEMO: = false
+-
++const EDITOR_IS_DEMO: = true
++ 
+ const URL_WISHLIST = "https://store.steampowered.com/app/3401490/Replicube/"
+ const URL_DISCORD = "https://discord.gg/walaber"
+ 
+@@ -103,614 +102,610 @@ var all_app_buttons: Dictionary[AppButton, AppWindow] = {}
+ var _hover_btn: Control = null
+ 
+ const CURSORS = {
+-    Input.CURSOR_ARROW: {
+-        "img": "res://Textures/cursor-arrow.png", 
+-        "hot": Vector2i.ZERO
+-    }, 
+-    Input.CURSOR_IBEAM: {
+-        "img": "res://Textures/cursor-ibeam.png", 
+-        "hot": Vector2i(4, 0)
+-    }, 
+-    Input.CURSOR_HSIZE: {
+-        "img": "res://Textures/cursor-hsize.png", 
+-        "hot": Vector2i(16, 16)
+-    }, 
+-    Input.CURSOR_HSPLIT: {
+-        "img": "res://Textures/cursor-hsize.png", 
+-        "hot": Vector2i(16, 16)
+-    }, 
+-    Input.CURSOR_VSIZE: {
+-        "img": "res://Textures/cursor-vsize.png", 
+-        "hot": Vector2i(16, 16)
+-    }, 
+-    Input.CURSOR_VSPLIT: {
+-        "img": "res://Textures/cursor-vsize.png", 
+-        "hot": Vector2i(16, 16)
+-    }, 
+-    Input.CURSOR_BDIAGSIZE: {
+-        "img": "res://Textures/cursor-bdiag.png", 
+-        "hot": Vector2i(16, 16)
+-    }, 
+-    Input.CURSOR_FDIAGSIZE: {
+-        "img": "res://Textures/cursor-fdiag.png", 
+-        "hot": Vector2i(16, 16)
+-    }, 
+-    Input.CURSOR_MOVE: {
+-        "img": "res://Textures/cursor-move.png", 
+-        "hot": Vector2i(14, 2)
+-    }, 
+-    Input.CURSOR_POINTING_HAND: {
+-        "img": "res://Textures/cursor-move.png", 
+-        "hot": Vector2i(14, 2)
+-    }, 
+-    Input.CURSOR_CROSS: {
+-        "img": "res://Textures/cursor-eye.png", 
+-        "hot": Vector2i(16, 16)
+-    }
++	Input.CURSOR_ARROW: {
++		"img": "res://Textures/cursor-arrow.png", 
++		"hot": Vector2i.ZERO
++	}, 
++	Input.CURSOR_IBEAM: {
++		"img": "res://Textures/cursor-ibeam.png", 
++		"hot": Vector2i(4, 0)
++	}, 
++	Input.CURSOR_HSIZE: {
++		"img": "res://Textures/cursor-hsize.png", 
++		"hot": Vector2i(16, 16)
++	}, 
++	Input.CURSOR_HSPLIT: {
++		"img": "res://Textures/cursor-hsize.png", 
++		"hot": Vector2i(16, 16)
++	}, 
++	Input.CURSOR_VSIZE: {
++		"img": "res://Textures/cursor-vsize.png", 
++		"hot": Vector2i(16, 16)
++	}, 
++	Input.CURSOR_VSPLIT: {
++		"img": "res://Textures/cursor-vsize.png", 
++		"hot": Vector2i(16, 16)
++	}, 
++	Input.CURSOR_BDIAGSIZE: {
++		"img": "res://Textures/cursor-bdiag.png", 
++		"hot": Vector2i(16, 16)
++	}, 
++	Input.CURSOR_FDIAGSIZE: {
++		"img": "res://Textures/cursor-fdiag.png", 
++		"hot": Vector2i(16, 16)
++	}, 
++	Input.CURSOR_MOVE: {
++		"img": "res://Textures/cursor-move.png", 
++		"hot": Vector2i(14, 2)
++	}, 
++	Input.CURSOR_POINTING_HAND: {
++		"img": "res://Textures/cursor-move.png", 
++		"hot": Vector2i(14, 2)
++	}, 
++	Input.CURSOR_CROSS: {
++		"img": "res://Textures/cursor-eye.png", 
++		"hot": Vector2i(16, 16)
++	}
+ }
+ 
+ enum MenuAction
+ {
+-    ShutDown, 
+-    NewSticky, 
+-    Tutorial, 
+-    Wishlist, 
+-    Discord, 
+-    Credits, 
+-    ShowAllStickies
++	ShutDown, 
++	NewSticky, 
++	Tutorial, 
++	Wishlist, 
++	Discord, 
++	Credits, 
++	ShowAllStickies
+ }
+ 
+ 
+ static func has_feature(f: String) -> bool:
+-    if OS.has_feature(f):
+-        return true
++	if OS.has_feature(f):
++		return true
+ 
+-    if Engine.is_editor_hint() or OS.has_feature("editor"):
+-        if f == FEATURE_DEMO and EDITOR_IS_DEMO:
+-            return true
++	if Engine.is_editor_hint() or OS.has_feature("editor"):
++		if f == FEATURE_DEMO and EDITOR_IS_DEMO:
++			return true
+ 
+-    return false
++	return false
+ 
+ 
+ func _ready():
+-    get_window().size_changed.connect(_window_size_changed)
+-    get_window().min_size = Vector2i(720, 480)
+-
+-    _remove_override_cfg()
++	Mod_Manager.load_mods()
++	get_window().size_changed.connect(_window_size_changed)
++	get_window().min_size = Vector2i(720, 480)
++
++	_remove_override_cfg()
+ 
+-    Settings.refresh_ui_scale()
++	Settings.refresh_ui_scale()
+ 
+-    boot_sequencer.play_boot_sound.connect(_play_boot_sound)
++	boot_sequencer.play_boot_sound.connect(_play_boot_sound)
+ 
+-    my_computer_button.pressed.connect(_show_my_computer_menu)
+-    my_computer_menu.close_requested.connect(_hide_my_computer_menu)
+-    my_computer_menu.hide()
++	my_computer_button.pressed.connect(_show_my_computer_menu)
++	my_computer_menu.close_requested.connect(_hide_my_computer_menu)
++	my_computer_menu.hide()
+ 
+-    file_selector.hide()
+-    save_popup.hide()
+-    confirmation_popup.hide()
++	file_selector.hide()
++	save_popup.hide()
++	confirmation_popup.hide()
+ 
+-    all_apps_new = [
+-        app_mail, 
+-        app_level_select, 
+-        app_voxel, 
+-        app_paint, 
+-        app_community, 
+-        app_settings, 
+-        app_share, 
+-        app_credits, 
+-        app_stack_it_up, 
+-        app_repl]
++	all_apps_new = [
++		app_mail, 
++		app_level_select, 
++		app_voxel, 
++		app_paint, 
++		app_community, 
++		app_settings, 
++		app_share, 
++		app_credits, 
++		app_stack_it_up, 
++		app_repl]
+ 
+-    all_app_buttons = {
+-        app_button_email: app_mail, 
+-        app_button_level_select: app_level_select, 
+-        app_button_voxel: app_voxel, 
+-        app_button_paint: app_paint, 
+-        app_button_community: app_community, 
+-        app_button_settings: app_settings, 
+-        app_button_stack_it_up: app_stack_it_up, 
+-        app_button_repl: app_repl
+-    }
++	all_app_buttons = {
++		app_button_email: app_mail, 
++		app_button_level_select: app_level_select, 
++		app_button_voxel: app_voxel, 
++		app_button_paint: app_paint, 
++		app_button_community: app_community, 
++		app_button_settings: app_settings, 
++		app_button_stack_it_up: app_stack_it_up, 
++		app_button_repl: app_repl
++	}
+ 
+-    playtest_watermark.text = VERSION_STRING
+-    if has_feature(FEATURE_DEMO):
+-        playtest_watermark.text = VERSION_STRING_DEMO
++	playtest_watermark.text = VERSION_STRING
++	if has_feature(FEATURE_DEMO):
++		playtest_watermark.text = VERSION_STRING_DEMO
+ 
+-    playtest_watermark.visible = IS_PLAYTEST
++	playtest_watermark.visible = IS_PLAYTEST
+ 
+-    if OS.is_debug_build():
+-        Console.enable()
+-    else:
+-        Console.disable()
++	if OS.is_debug_build():
++		Console.enable()
++	else:
++		Console.disable()
+ 
+-    set_ui_theme(Settings.get_ui_theme() == 1)
+-    for app: AppWindow in all_apps_new:
+-        app.try_apply_settings(Settings.get_window_settings(app.name))
++	set_ui_theme(Settings.get_ui_theme() == 1)
++	for app: AppWindow in all_apps_new:
++		app.try_apply_settings(Settings.get_window_settings(app.name))
+ 
+-    export_dialog.hide()
+-    file_selector.hide()
++	export_dialog.hide()
++	file_selector.hide()
+ 
+-    app_settings.ui_theme_changed.connect(_ui_theme_changed)
++	app_settings.ui_theme_changed.connect(_ui_theme_changed)
+ 
+-    _try_load_desktop_bg()
++	_try_load_desktop_bg()
+ 
+ 
+-    sticky_notes.load_stickies()
+-    sticky_notes.note_removed.connect(_note_removed)
++	sticky_notes.load_stickies()
++	sticky_notes.note_removed.connect(_note_removed)
+ 
+-    for app: AppWindow in all_apps_new:
+-        app.hide()
+-        app.foreground_requested.connect(app_focused.bind(app))
+-        app.close_requested.connect(close_app_new.bind(app))
+-        app.settings_changed.connect(_save_window_settings)
++	for app: AppWindow in all_apps_new:
++		app.hide()
++		app.foreground_requested.connect(app_focused.bind(app))
++		app.close_requested.connect(close_app_new.bind(app))
++		app.settings_changed.connect(_save_window_settings)
+ 
+-    _refresh_dock_activated_apps()
++	_refresh_dock_activated_apps()
+ 
+-    app_voxel.level_completed.connect(_level_completed)
++	app_voxel.level_completed.connect(_level_completed)
+ 
+-    app_button_voxel.icon_button.pressed.connect(show_voxel_editor_app)
+-    app_button_email.icon_button.pressed.connect(show_email)
+-    app_button_level_select.icon_button.pressed.connect(show_level_select)
+-    app_button_paint.icon_button.pressed.connect(show_paint)
+-    app_button_community.icon_button.pressed.connect(show_community)
+-    app_button_settings.icon_button.pressed.connect(_show_settings)
+-    app_button_stack_it_up.icon_button.pressed.connect(_show_stack_it_up)
+-    app_button_repl.icon_button.pressed.connect(_show_repl)
++	app_button_voxel.icon_button.pressed.connect(show_voxel_editor_app)
++	app_button_email.icon_button.pressed.connect(show_email)
++	app_button_level_select.icon_button.pressed.connect(show_level_select)
++	app_button_paint.icon_button.pressed.connect(show_paint)
++	app_button_community.icon_button.pressed.connect(show_community)
++	app_button_settings.icon_button.pressed.connect(_show_settings)
++	app_button_stack_it_up.icon_button.pressed.connect(_show_stack_it_up)
++	app_button_repl.icon_button.pressed.connect(_show_repl)
+ 
+-    for app_button: AppButton in all_app_buttons:
+-        var app: AppWindow = all_app_buttons[app_button]
+-        app_button.hover_changed.connect(_app_button_hover_changed.bind(app_button, app.window_title))
++	for app_button: AppButton in all_app_buttons:
++		var app: AppWindow = all_app_buttons[app_button]
++		app_button.hover_changed.connect(_app_button_hover_changed.bind(app_button, app.window_title))
+ 
+-    my_computer_button.mouse_entered.connect(_app_button_hover_changed.bind(true, my_computer_button, "DEVICE MENU"))
+-    my_computer_button.mouse_exited.connect(_app_button_hover_changed.bind(false, my_computer_button, "DEVICE MENU"))
++	my_computer_button.mouse_entered.connect(_app_button_hover_changed.bind(true, my_computer_button, "DEVICE MENU"))
++	my_computer_button.mouse_exited.connect(_app_button_hover_changed.bind(false, my_computer_button, "DEVICE MENU"))
+ 
+-    new_sticky_button.mouse_entered.connect(_app_button_hover_changed.bind(true, new_sticky_button, "ADD STICKY NOTE"))
+-    new_sticky_button.mouse_exited.connect(_app_button_hover_changed.bind(false, new_sticky_button, "ADD STICKY NOTE"))
++	new_sticky_button.mouse_entered.connect(_app_button_hover_changed.bind(true, new_sticky_button, "ADD STICKY NOTE"))
++	new_sticky_button.mouse_exited.connect(_app_button_hover_changed.bind(false, new_sticky_button, "ADD STICKY NOTE"))
+ 
+-    show_stickies_button.mouse_entered.connect(_app_button_hover_changed.bind(true, show_stickies_button, "SHOW ALL STICKIES"))
+-    show_stickies_button.mouse_exited.connect(_app_button_hover_changed.bind(false, show_stickies_button, "SHOW ALL STICKIES"))
++	show_stickies_button.mouse_entered.connect(_app_button_hover_changed.bind(true, show_stickies_button, "SHOW ALL STICKIES"))
++	show_stickies_button.mouse_exited.connect(_app_button_hover_changed.bind(false, show_stickies_button, "SHOW ALL STICKIES"))
+ 
+-    app_level_select.edit_level.connect(_on_level_select_root_edit_level)
+-    app_level_select.load_level.connect(_on_level_select_root_load_level.bind(false))
+-    app_level_select.load_challenge.connect(_on_level_select_root_load_level.bind(true))
+-    app_level_select.free_edit.connect(_on_level_select_root_free_edit)
+-    app_level_select.load_paint.connect(_on_level_select_root_load_paint)
++	app_level_select.edit_level.connect(_on_level_select_root_edit_level)
++	app_level_select.load_level.connect(_on_level_select_root_load_level.bind(false))
++	app_level_select.load_challenge.connect(_on_level_select_root_load_level.bind(true))
++	app_level_select.free_edit.connect(_on_level_select_root_free_edit)
++	app_level_select.load_paint.connect(_on_level_select_root_load_paint)
+ 
+ 
+-    NodeUtils.add_menu_item("Show Tutorial", MenuAction.Tutorial, KEY_NONE, my_computer_menu)
++	NodeUtils.add_menu_item("Show Tutorial", MenuAction.Tutorial, KEY_NONE, my_computer_menu)
+ 
+-    if has_feature(FEATURE_DEMO):
+-        NodeUtils.add_menu_item("Wishlist on Steam", MenuAction.Wishlist, KEY_NONE, my_computer_menu)
+-        NodeUtils.add_menu_item("Join Walaber Discord", MenuAction.Discord, KEY_NONE, my_computer_menu)
++	if has_feature(FEATURE_DEMO):
++		NodeUtils.add_menu_item("Wishlist on Steam", MenuAction.Wishlist, KEY_NONE, my_computer_menu)
++		NodeUtils.add_menu_item("Join Walaber Discord", MenuAction.Discord, KEY_NONE, my_computer_menu)
+ 
+-    NodeUtils.add_menu_item("About...", MenuAction.Credits, KEY_NONE, my_computer_menu)
+-    NodeUtils.add_menu_item("Shut Down", MenuAction.ShutDown, KEY_NONE, my_computer_menu)
++	NodeUtils.add_menu_item("About...", MenuAction.Credits, KEY_NONE, my_computer_menu)
++	NodeUtils.add_menu_item("Shut Down", MenuAction.ShutDown, KEY_NONE, my_computer_menu)
+ 
+-    my_computer_menu.id_pressed.connect(_menu_action_pressed)
+-    new_sticky_button.pressed.connect(_menu_action_pressed.bind(MenuAction.NewSticky))
+-    show_stickies_button.pressed.connect(_menu_action_pressed.bind(MenuAction.ShowAllStickies))
++	my_computer_menu.id_pressed.connect(_menu_action_pressed)
++	new_sticky_button.pressed.connect(_menu_action_pressed.bind(MenuAction.NewSticky))
++	show_stickies_button.pressed.connect(_menu_action_pressed.bind(MenuAction.ShowAllStickies))
+ 
+ 
+-    for c: Input.CursorShape in CURSORS:
+-        var info: Dictionary = CURSORS[c]
+-        var img: Texture2D = load(info["img"])
+-        var hotspot: Vector2i = info["hot"]
+-        Input.set_custom_mouse_cursor(img, c, hotspot)
++	for c: Input.CursorShape in CURSORS:
++		var info: Dictionary = CURSORS[c]
++		var img: Texture2D = load(info["img"])
++		var hotspot: Vector2i = info["hot"]
++		Input.set_custom_mouse_cursor(img, c, hotspot)
+ 
+ 
+-    _on_update_clock_timer_timeout()
++	_on_update_clock_timer_timeout()
+ 
+-    app_mail.email_received.connect(_got_email)
+-    app_mail.email_opened.connect(_opened_email)
+-    app_mail.attachment_opened.connect(_attachment_opened)
++	app_mail.email_received.connect(_got_email)
++	app_mail.email_opened.connect(_opened_email)
++	app_mail.attachment_opened.connect(_attachment_opened)
+ 
+-    app_paint.img_set_as_desktop.connect(_set_desktop_bg)
++	app_paint.img_set_as_desktop.connect(_set_desktop_bg)
+ 
+-    ButtonSounds.add_button_sounds(self)
++	ButtonSounds.add_button_sounds(self)
+ 
+-    if Progress.load_result != OK:
+-        _start_tutorial()
++	if Progress.load_result != OK:
++		_start_tutorial()
+ 
+ 
+-    _nudge_email_if_unread()
++	_nudge_email_if_unread()
+ 
+-    _refresh_sorted_apps()
+-
+-    app_name_popup.hide()
++	_refresh_sorted_apps()
+ 
++	app_name_popup.hide()
+ 
+ func _play_boot_sound() -> void :
+-    sfx_startup.play()
+-    await sfx_startup.finished
+-    music_player.startup()
++	sfx_startup.play()
++	await sfx_startup.finished
++	music_player.startup()
+ 
+ 
+ func _refresh_dock_activated_apps() -> void :
+-    for app_button: AppButton in all_app_buttons:
+-        var app: AppWindow = all_app_buttons[app_button]
+-        app_button.visible = ( not app.unlockable) or Progress.is_app_activated(app.name)
++	for app_button: AppButton in all_app_buttons:
++		var app: AppWindow = all_app_buttons[app_button]
++		app_button.visible = ( not app.unlockable) or Progress.is_app_activated(app.name)
+ 
+ 
+ func _window_size_changed() -> void :
+-    for kid in application_space.get_children():
+-        var app: AppWindow = kid as AppWindow
+-        if app != null:
+-            app.window_resized()
++	for kid in application_space.get_children():
++		var app: AppWindow = kid as AppWindow
++		if app != null:
++			app.window_resized()
+ 
+ func show_app_new(app: AppWindow) -> void :
+-    app.show_app()
+-    app.process_mode = Node.PROCESS_MODE_INHERIT
+-    app_focused(app)
++	app.show_app()
++	app.process_mode = Node.PROCESS_MODE_INHERIT
++	app_focused(app)
+ 
+ 
+ 
+ func app_focused(app: AppWindow) -> void :
+-    set_active_app(app)
++	set_active_app(app)
+ 
+ func set_active_app(app: AppWindow) -> void :
+-    application_space.move_child(app, -1)
++	application_space.move_child(app, -1)
+ 
+-    for app_button: AppButton in all_app_buttons:
+-        if app_button.active and all_app_buttons[app_button] != app:
+-            app_button.active = false
++	for app_button: AppButton in all_app_buttons:
++		if app_button.active and all_app_buttons[app_button] != app:
++			app_button.active = false
+ 
+-        if all_app_buttons[app_button] == app:
+-            app_button.active = true
+-            app_button.pop_nudge("OPEN")
++		if all_app_buttons[app_button] == app:
++			app_button.active = true
++			app_button.pop_nudge("OPEN")
+ 
+-    _refresh_sorted_apps()
++	_refresh_sorted_apps()
+ 
+-    for a: AppWindow in _sorted_apps:
+-        a.set_foreground(a == app)
++	for a: AppWindow in _sorted_apps:
++		a.set_foreground(a == app)
+ 
+ 
+ func _refresh_sorted_apps() -> void :
+ 
+-    _sorted_apps.clear()
+-    for a: AppWindow in all_apps_new:
+-        if a.visible:
+-            _sorted_apps.append(a)
++	_sorted_apps.clear()
++	for a: AppWindow in all_apps_new:
++		if a.visible:
++			_sorted_apps.append(a)
+ 
+-    for kid in application_space.get_children():
+-        var sticky: StickyNote = kid as StickyNote
+-        if sticky and not sticky.is_queued_for_deletion():
+-            if sticky.visible:
+-                _sorted_apps.append(sticky)
++	for kid in application_space.get_children():
++		var sticky: StickyNote = kid as StickyNote
++		if sticky and not sticky.is_queued_for_deletion():
++			if sticky.visible:
++				_sorted_apps.append(sticky)
+ 
+-    _sorted_apps.sort_custom(_sort_app_window)
++	_sorted_apps.sort_custom(_sort_app_window)
+ 
+ 
+ func _sort_app_window(a: AppWindow, b: AppWindow) -> bool:
+-    if not a.visible:
+-        return false
++	if not a.visible:
++		return false
+ 
+-    return a.get_index() > b.get_index()
++	return a.get_index() > b.get_index()
+ 
+ func close_app_new(app: AppWindow) -> void :
+-    sfx_app_close.play()
+-    app.hide()
+-    app.process_mode = Node.PROCESS_MODE_DISABLED
++	sfx_app_close.play()
++	app.hide()
++	app.process_mode = Node.PROCESS_MODE_DISABLED
+ 
+-    for app_button: AppButton in all_app_buttons:
+-        if app_button.active and all_app_buttons[app_button] == app:
+-            app_button.active = false
++	for app_button: AppButton in all_app_buttons:
++		if app_button.active and all_app_buttons[app_button] == app:
++			app_button.active = false
+ 
+-    _refresh_sorted_apps()
++	_refresh_sorted_apps()
+ 
+-    if _sorted_apps.size() > 0:
+-        set_active_app(_sorted_apps[0])
++	if _sorted_apps.size() > 0:
++		set_active_app(_sorted_apps[0])
+ 
+ 
+ func _input(event: InputEvent) -> void :
+-    if OS.is_debug_build() or OS.has_feature("editor"):
+-        _maybe_save_screenshot(event)
++	if OS.is_debug_build() or OS.has_feature("editor"):
++		_maybe_save_screenshot(event)
+ 
+ 
+ 
+-    if tutorial_container.get_child_count() == 0:
+-        var btn_event: InputEventMouseButton = event as InputEventMouseButton
+-        if btn_event:
+-            if btn_event.pressed:
+-                var mouse_pos: Vector2 = btn_event.global_position
+-                for i in range(_sorted_apps.size()):
+-                    var app: AppWindow = _sorted_apps[i]
++	if tutorial_container.get_child_count() == 0:
++		var btn_event: InputEventMouseButton = event as InputEventMouseButton
++		if btn_event:
++			if btn_event.pressed:
++				var mouse_pos: Vector2 = btn_event.global_position
++				for i in range(_sorted_apps.size()):
++					var app: AppWindow = _sorted_apps[i]
+ 
+-                    if app.get_global_rect().has_point(mouse_pos):
+-                        if i > 0 or app is StickyNote:
+-                            app_focused(app)
++					if app.get_global_rect().has_point(mouse_pos):
++						if i > 0 or app is StickyNote:
++							app_focused(app)
+ 
+-                        break
++						break
+ 
+ 
+ func _menu_action_pressed(id: int) -> void :
+-    match id:
+-        MenuAction.ShutDown:
+-            get_tree().quit()
++	match id:
++		MenuAction.ShutDown:
++			get_tree().quit()
+ 
+-        MenuAction.NewSticky:
+-            sticky_notes.new_note()
+-            _refresh_sorted_apps()
++		MenuAction.NewSticky:
++			sticky_notes.new_note()
++			_refresh_sorted_apps()
+ 
+-        MenuAction.ShowAllStickies:
+-            sticky_notes.foreground_all()
+-            _refresh_sorted_apps()
++		MenuAction.ShowAllStickies:
++			sticky_notes.foreground_all()
++			_refresh_sorted_apps()
+ 
+-        MenuAction.Tutorial:
+-            _start_tutorial()
++		MenuAction.Tutorial:
++			_start_tutorial()
+ 
+-        MenuAction.Wishlist:
+-            OS.shell_open(URL_WISHLIST)
++		MenuAction.Wishlist:
++			OS.shell_open(URL_WISHLIST)
+ 
+-        MenuAction.Discord:
+-            OS.shell_open(URL_DISCORD)
++		MenuAction.Discord:
++			OS.shell_open(URL_DISCORD)
+ 
+-        MenuAction.Credits:
+-            show_app_new(app_credits)
++		MenuAction.Credits:
++			show_app_new(app_credits)
+ 
+ func _note_removed() -> void :
+-    _refresh_sorted_apps()
++	_refresh_sorted_apps()
+ 
+ func _level_completed() -> void :
+-    app_level_select.refresh_now()
+-    game_progressor.reset_timer()
++	app_level_select.refresh_now()
++	game_progressor.reset_timer()
+ 
+ func show_email():
+-    show_app_new(app_mail)
++	show_app_new(app_mail)
+ 
+ func show_level_select():
+-    show_app_new(app_level_select)
++	show_app_new(app_level_select)
+ 
+ func show_voxel_editor_app() -> void :
+-    if app_voxel.visible:
+-        show_app_new(app_voxel)
+-    else:
+-        show_voxel_editor(true, false, "", ProgressTracker.PuzzleSource.Player)
++	if app_voxel.visible:
++		show_app_new(app_voxel)
++	else:
++		show_voxel_editor(true, false, "", ProgressTracker.PuzzleSource.Player)
+ 
+ func show_voxel_editor(freemode: bool, is_challenge: bool, lvl: String, src: ProgressTracker.PuzzleSource):
+-    app_voxel.save_progress()
+-
+-    show_app_new(app_voxel)
++	app_voxel.save_progress()
+ 
+-    if (freemode == false):
+-        Progress.set_puzzle(lvl, src)
+-        app_voxel.start_puzzle(lvl, src, is_challenge)
+-    else:
+-        if lvl == "":
+-            Progress.set_puzzle_player_new()
+-        else:
+-            Progress.set_puzzle(lvl, src)
+-        app_voxel.start_freemode()
++	show_app_new(app_voxel)
++	print(lvl)
++	if (freemode == false):
++		Progress.set_puzzle(lvl, src)
++		app_voxel.start_puzzle(lvl, src, is_challenge)
++	else:
++		if lvl == "":
++			Progress.set_puzzle_player_new()
++		else:
++			Progress.set_puzzle(lvl, src)
++		app_voxel.start_freemode()
+ 
+ 
+ func show_voxel_editor_edit(lvl: String) -> void :
+ 
+-    show_app_new(app_voxel)
++	show_app_new(app_voxel)
+ 
+-    Progress.set_puzzle_edit(lvl)
+-    app_voxel.start_freemode()
++	Progress.set_puzzle_edit(lvl)
++	app_voxel.start_freemode()
+ 
+ func show_paint():
+-    show_app_new(app_paint)
++	show_app_new(app_paint)
+ 
+ func show_paint_with_file(file: String) -> void :
+-    show_paint()
+-    app_paint.load_file(file)
++	show_paint()
++	app_paint.load_file(file)
+ 
+ func show_community() -> void :
+-    show_app_new(app_community)
++	show_app_new(app_community)
+ 
+ func _on_level_select_root_load_level(lvl: String, src: ProgressTracker.PuzzleSource, is_challenge: bool) -> void :
+-    show_voxel_editor(false, is_challenge, lvl, src)
++	show_voxel_editor(false, is_challenge, lvl, src)
+ 
+ func _on_level_select_root_edit_level(lvl: String, src: ProgressTracker.PuzzleSource) -> void :
+-    show_voxel_editor_edit(lvl)
++	show_voxel_editor_edit(lvl)
+ 
+ func _on_level_select_root_free_edit() -> void :
+-    show_voxel_editor(true, false, "", ProgressTracker.PuzzleSource.Player)
++	show_voxel_editor(true, false, "", ProgressTracker.PuzzleSource.Player)
+ 
+ func _on_level_select_root_load_paint(lvl: String) -> void :
+-    show_paint_with_file(lvl)
++	show_paint_with_file(lvl)
+ 
+ func _attachment_opened(action: String, data: Variant) -> void :
+-    match action:
+-        "unlock_set":
+-            var set_id: String = data
+-            print(set_id)
+-            Progress.mark_set_as_active(set_id)
+-            Progress.current_set = set_id
+-            Progress.current_puzzle_src = Progress.PuzzleSource.Internal
+-            show_level_select()
+-
+-        "unlock_app":
+-            var app_name: String = data
+-            Progress.activate_app(app_name)
+-            _maybe_animate_app_unlock(app_name)
+-            for app: AppWindow in all_apps_new:
+-                app.on_app_unlocked(app_name)
+-
+-        "unlock_feature":
+-            var feature_name: String = data
+-            Progress.activate_feature(feature_name)
+-            sfx_run_script.play()
+-            for app: AppWindow in all_apps_new:
+-                var relevant: bool = app.on_feature_activated(feature_name)
+-                if relevant and app == app_level_select:
+-                    show_level_select()
+-                elif relevant and app == app_community:
+-                    show_community()
+-
+-        "paint_file":
+-            var src_path: String = "res://Emails/%s.txt" % data
+-            var usr_path: String = PaintApplication.save_email_attachment(src_path, data)
+-            show_paint_with_file(usr_path)
++	match action:
++		"unlock_set":
++			var set_id: String = data
++			print(set_id)
++			Progress.mark_set_as_active(set_id)
++			Progress.current_set = set_id
++			Progress.current_puzzle_src = Progress.PuzzleSource.Internal
++			show_level_select()
++
++		"unlock_app":
++			var app_name: String = data
++			Progress.activate_app(app_name)
++			_maybe_animate_app_unlock(app_name)
++			for app: AppWindow in all_apps_new:
++				app.on_app_unlocked(app_name)
++
++		"unlock_feature":
++			var feature_name: String = data
++			Progress.activate_feature(feature_name)
++			sfx_run_script.play()
++			for app: AppWindow in all_apps_new:
++				app.on_feature_activated(feature_name)
++
++		"paint_file":
++			var src_path: String = "res://Emails/%s.txt" % data
++			var usr_path: String = PaintApplication.save_email_attachment(src_path, data)
++			show_paint_with_file(usr_path)
+ 
+ func _try_load_desktop_bg() -> void :
+-    if FileAccess.file_exists(DESKTOP_BG_PATH):
+-        var img: Image = Image.load_from_file(DESKTOP_BG_PATH)
+-        if img:
+-            desktop_bg.texture = ImageTexture.create_from_image(img)
++	if FileAccess.file_exists(DESKTOP_BG_PATH):
++		var img: Image = Image.load_from_file(DESKTOP_BG_PATH)
++		if img:
++			desktop_bg.texture = ImageTexture.create_from_image(img)
+ 
+ func _set_desktop_bg(img: Image) -> void :
+-    img.save_png(DESKTOP_BG_PATH)
+-    desktop_bg.texture = ImageTexture.create_from_image(img)
++	img.save_png(DESKTOP_BG_PATH)
++	desktop_bg.texture = ImageTexture.create_from_image(img)
+ 
+ func _maybe_save_screenshot(event: InputEvent) -> void :
+-    var key_event: InputEventKey = event as InputEventKey
+-    if key_event != null:
+-        if key_event.pressed and key_event.ctrl_pressed:
+-            if key_event.keycode == KEY_P:
+-                var img: Image = get_viewport().get_texture().get_image()
+-                var di: Dictionary = Time.get_datetime_dict_from_system()
+-                var filename: String = "user://cube-%d-%d-%d-%d-%d.png" % [di["year"], di["month"], di["day"], di["hour"], di["minute"]]
+-                img.save_png(filename)
++	var key_event: InputEventKey = event as InputEventKey
++	if key_event != null:
++		if key_event.pressed and key_event.ctrl_pressed:
++			if key_event.keycode == KEY_P:
++				var img: Image = get_viewport().get_texture().get_image()
++				var di: Dictionary = Time.get_datetime_dict_from_system()
++				var filename: String = "user://cube-%d-%d-%d-%d-%d.png" % [di["year"], di["month"], di["day"], di["hour"], di["minute"]]
++				img.save_png(filename)
+ 
+ 
+ func _on_update_clock_timer_timeout() -> void :
+-    time_and_date.text = TimeFormatter.print_date_and_time_from_dict(Time.get_datetime_dict_from_system(), "\n")
++	time_and_date.text = TimeFormatter.print_date_and_time_from_dict(Time.get_datetime_dict_from_system(), "\n")
+ 
+ 
+ func _start_tutorial() -> void :
+-    var tut: TutorialSequence = tutorial_scene.instantiate() as TutorialSequence
+-    tutorial_container.add_child(tut)
+-    tut.done.connect(_end_tutorial.bind(tut))
+-    tut.wants_focus.connect(_focus_tutorial)
++	var tut: TutorialSequence = tutorial_scene.instantiate() as TutorialSequence
++	tutorial_container.add_child(tut)
++	tut.done.connect(_end_tutorial.bind(tut))
++	tut.wants_focus.connect(_focus_tutorial)
+ 
+-    ButtonSounds.add_button_sounds(tut)
++	ButtonSounds.add_button_sounds(tut)
+ 
+ 
+-    my_computer_menu.set_item_disabled(my_computer_menu.get_item_index(MenuAction.Tutorial), true)
++	my_computer_menu.set_item_disabled(my_computer_menu.get_item_index(MenuAction.Tutorial), true)
+ 
+-    for b in all_app_buttons:
+-        if b == app_button_settings:
+-            b.show()
+-        else:
+-            b.hide()
++	for b in all_app_buttons:
++		if b == app_button_settings:
++			b.show()
++		else:
++			b.hide()
+ 
+-    new_sticky_button.hide()
+-    show_stickies_button.hide()
+-    tutorial_container.move_to_front()
++	new_sticky_button.hide()
++	show_stickies_button.hide()
++	tutorial_container.move_to_front()
+ 
+ func _focus_tutorial() -> void :
+-    tutorial_container.move_to_front()
+-    app_button_settings.active = false
++	tutorial_container.move_to_front()
++	app_button_settings.active = false
+ 
+ func _end_tutorial(tut: TutorialSequence) -> void :
+-    tut.queue_free()
++	tut.queue_free()
+ 
+-    my_computer_menu.set_item_disabled(my_computer_menu.get_item_index(MenuAction.Tutorial), false)
+-    _refresh_dock_activated_apps()
+-    new_sticky_button.show()
+-    show_stickies_button.show()
++	my_computer_menu.set_item_disabled(my_computer_menu.get_item_index(MenuAction.Tutorial), false)
++	_refresh_dock_activated_apps()
++	new_sticky_button.show()
++	show_stickies_button.show()
+ 
+ 
+ func _ui_theme_changed(val: int) -> void :
+-    set_ui_theme(val)
+-    Settings.set_ui_theme(val)
++	set_ui_theme(val)
++	Settings.set_ui_theme(val)
+ 
+ 
+ func _show_settings() -> void :
+-    show_app_new(app_settings)
++	show_app_new(app_settings)
+ 
+ func _show_share(info: Dictionary) -> void :
+-    show_app_new(app_share)
+-    app_share.setup(info)
++	show_app_new(app_share)
++	app_share.setup(info)
+ 
+ func _show_stack_it_up() -> void :
+-    show_app_new(app_stack_it_up)
++	show_app_new(app_stack_it_up)
+ 
+ func _show_repl() -> void :
+-    show_app_new(app_repl)
++	show_app_new(app_repl)
+ 
+ func set_ui_theme(dark: bool) -> void :
+-    desktop.theme = theme_dark if dark else theme_light
+-    application_space.theme = theme_dark if dark else theme_light
+-    desktop_popups.theme = theme_dark if dark else theme_light
+-    tutorial_container.theme = theme_dark if dark else theme_light
++	desktop.theme = theme_dark if dark else theme_light
++	application_space.theme = theme_dark if dark else theme_light
++	desktop_popups.theme = theme_dark if dark else theme_light
++	tutorial_container.theme = theme_dark if dark else theme_light
+ 
+ 
+-    for n in get_tree().get_nodes_in_group("color_target"):
+-        n.refresh_color(dark, ui_colors)
++	for n in get_tree().get_nodes_in_group("color_target"):
++		n.refresh_color(dark, ui_colors)
+ 
+ func _save_window_settings() -> void :
+-    for app: AppWindow in all_apps_new:
+-        var window_dict: Dictionary = app.get_settings()
+-        Settings.set_window_settings(app.name, window_dict)
++	for app: AppWindow in all_apps_new:
++		var window_dict: Dictionary = app.get_settings()
++		Settings.set_window_settings(app.name, window_dict)
+ 
+ func _show_my_computer_menu() -> void :
+-    my_computer_menu.position = my_computer_button.global_position + Vector2(0.0, my_computer_button.size.y)
+-    my_computer_menu.show()
++	my_computer_menu.position = my_computer_button.global_position + Vector2(0.0, my_computer_button.size.y)
++	my_computer_menu.show()
+ 
+ func _hide_my_computer_menu() -> void :
+-    my_computer_menu.hide()
++	my_computer_menu.hide()
+ 
+ 
+ func _maybe_animate_app_unlock(app_name: String) -> void :
+-    var app_btn: AppButton = null
+-    for b: AppButton in all_app_buttons:
+-        var app: AppWindow = all_app_buttons[b]
+-        if app.name == app_name:
+-            app_btn = b
+-            break
+-
+-    if not app_btn.visible:
+-        var stretcher: Control = Control.new()
+-        stretcher.custom_minimum_size = Vector2(0, 0)
+-        dock_container.add_child(stretcher)
+-
+-        dock_container.move_child(stretcher, app_btn.get_index())
+-
+-        sfx_app_unlock.play()
+-
+-        var t: Tween = create_tween()
+-        t.set_ease(Tween.EASE_IN_OUT)
+-        t.set_trans(Tween.TRANS_SINE)
+-        t.tween_property(stretcher, "custom_minimum_size", app_btn.get_combined_minimum_size(), 0.6)
+-        t.tween_interval(0.2)
+-        await t.finished
+-        stretcher.hide()
+-        _refresh_dock_activated_apps()
+-        stretcher.queue_free()
+-        app_btn.push_nudge("OPEN")
++	var app_btn: AppButton = null
++	for b: AppButton in all_app_buttons:
++		var app: AppWindow = all_app_buttons[b]
++		if app.name == app_name:
++			app_btn = b
++			break
++
++	if not app_btn.visible:
++		var stretcher: Control = Control.new()
++		stretcher.custom_minimum_size = Vector2(0, 0)
++		dock_container.add_child(stretcher)
++
++		dock_container.move_child(stretcher, app_btn.get_index())
++
++		sfx_app_unlock.play()
++
++		var t: Tween = create_tween()
++		t.set_ease(Tween.EASE_IN_OUT)
++		t.set_trans(Tween.TRANS_SINE)
++		t.tween_property(stretcher, "custom_minimum_size", app_btn.get_combined_minimum_size(), 0.6)
++		t.tween_interval(0.2)
++		await t.finished
++		stretcher.hide()
++		_refresh_dock_activated_apps()
++		stretcher.queue_free()
++		app_btn.push_nudge("OPEN")
+ 
+ func _got_email() -> void :
+-    _nudge_email_if_unread()
+-    sfx_got_mail.play()
++	_nudge_email_if_unread()
++	sfx_got_mail.play()
+ 
+ func _nudge_email_if_unread() -> void :
+-    if app_mail.has_unread():
+-        app_button_email.push_nudge("UNREAD")
+-        app_button_email.set_icon(email_icon_full)
+-    else:
+-        app_button_email.pop_nudge("UNREAD")
+-        app_button_email.set_icon(email_icon_empty)
++	if app_mail.has_unread():
++		app_button_email.push_nudge("UNREAD")
++		app_button_email.set_icon(email_icon_full)
++	else:
++		app_button_email.pop_nudge("UNREAD")
++		app_button_email.set_icon(email_icon_empty)
+ 
+ func _opened_email() -> void :
+-    _nudge_email_if_unread()
++	_nudge_email_if_unread()
+ 
+ func play_item_select_sfx() -> void :
+-    sfx_item_select.play()
++	sfx_item_select.play()
+ 
+ 
+ func _remove_override_cfg() -> void :
+-    if FileAccess.file_exists("override.cfg"):
+-        DirAccess.remove_absolute("override.cfg")
++	if FileAccess.file_exists("override.cfg"):
++		DirAccess.remove_absolute("override.cfg")
+ 
+ 
+ func _app_button_hover_changed(hover: bool, btn: Control, name: String) -> void :
+-    if hover:
+-        _hover_btn = btn
+-        app_name_popup.show()
+-        app_name_popup_label.text = name
+-        app_name_popup.size = Vector2.ZERO
+-
+-        var desired_pos = btn.global_position + Vector2(btn.size.x / 2, btn.size.y + 3)
+-        var half_w = app_name_popup.size.x / 2
+-        desired_pos.x -= half_w
+-        desired_pos.x = clamp(desired_pos.x, 0, get_window().size.x - (half_w * 2))
+-        app_name_popup.global_position = desired_pos
+-
+-    else:
+-        if btn == _hover_btn:
+-            app_name_popup.hide()
+-            _hover_btn = null
++	if hover:
++		_hover_btn = btn
++		app_name_popup.show()
++		app_name_popup_label.text = name
++		app_name_popup.size = Vector2.ZERO
++
++		var desired_pos = btn.global_position + Vector2(btn.size.x / 2, btn.size.y + 3)
++		var half_w = app_name_popup.size.x / 2
++		desired_pos.x -= half_w
++		desired_pos.x = clamp(desired_pos.x, 0, get_window().size.x - (half_w * 2))
++		app_name_popup.global_position = desired_pos
++
++	else:
++		if btn == _hover_btn:
++			app_name_popup.hide()
++			_hover_btn = null
+diff --git a/GDSripts/ModManager.gd b/GDSripts/ModManager.gd
+new file mode 100644
+index 0000000..b81d229
+--- /dev/null
++++ b/GDSripts/ModManager.gd
+@@ -0,0 +1,87 @@
++extends Node
++class_name ModManager
++var _mods = {}
++
++func get_mod_manifest(modid:String) -> Dictionary:
++	return _mods[modid]
++	
++func get_mods():
++	print(_mods)
++	return _mods
++
++func load_mods():
++	var dir_path = "res://mods"
++	var dir = DirAccess.open(dir_path)
++	
++	# Ensure the directory exists
++	if dir == null:
++		DirAccess.make_dir_absolute(dir_path)
++		print("Mods directory created")
++		return  # If we just created it, there's nothing to load
++	print("Mods directory exists!")
++	dir.list_dir_begin()
++	var file_name = dir.get_next()
++
++	# Load mods
++	while file_name != "":
++		print("Mod founded on folder!")
++		if not dir.current_is_dir():
++			var mod_path = dir_path + "/" + file_name
++			load_mod(dir_path, file_name)
++		else:
++			print("Mod is dir.current_is_dir :(")
++			print(dir_path + "/" + file_name)
++		file_name = dir.get_next()
++	
++	dir.list_dir_end()
++		
++func load_mod(dir_path, file_name):
++	var path = dir_path + "/" + file_name
++	var file_name_without_extension = file_name.get_basename()
++	var success = ProjectSettings.load_resource_pack(path, true)
++	if success:
++		if ResourceLoader.exists("mod_manifest.json"):
++			print("Manifest founded!")
++			var mod_manifest_file := FileAccess.open("res://mods/"+ file_name_without_extension +"/mod_manifest.json", FileAccess.READ)
++			print(mod_manifest_file.get_as_text())
++			if mod_manifest_file == null:
++				print(mod_manifest_file)
++				print("No manifest file found from "+path)
++				return
++			
++			var mod_manifest = JSON.parse_string(mod_manifest_file.get_as_text())
++			if mod_manifest == null:
++				print("Unable to parse mod_manifest.json from "+path)
++				return
++			var root_folder
++			var mod_id = mod_manifest["id"]
++			var mod_name = mod_manifest["name"]
++			
++			if (not mod_manifest.keys().has("root")):
++				root_folder = "res://mods/"+mod_id+"/"
++			else:
++				root_folder = mod_manifest["root"]
++			if not root_folder.ends_with("/"):
++				root_folder = root_folder+"/"
++			
++			var main_path = root_folder+mod_manifest["main"]
++			
++			# Load the mod
++			if ResourceLoader.exists(main_path):
++				var mod_main = load(main_path).new()
++				
++				if mod_main.has_method("initialize"):
++					mod_main.initialize()
++				
++				mod_manifest["modpath"] = path
++				print(mod_manifest)
++				_mods[mod_id] = mod_manifest
++				
++				print("Mod '"+mod_name+"' loaded!")
++			else:
++				print("No Main file found for "+mod_name)
++				return
++		else:
++			print("Main script not found in the loaded pack")
++	else:
++		print("Failed to load mod from "+path)
+diff --git a/GDSripts/ProgressTracker.gd b/GDSripts/ProgressTracker.gd
+index 35159d9..25cc0b2 100644
+--- a/GDSripts/ProgressTracker.gd
++++ b/GDSripts/ProgressTracker.gd
+@@ -5,29 +5,29 @@ const FREE_EDIT_ID: = "__free_edit__"
+ 
+ enum PuzzleSource
+ {
+-    Internal = 100, 
+-    Player = 200, 
+-    Downloaded = 300
++	Internal = 100, 
++	Player = 200, 
++	Downloaded = 300
+ }
+ 
+ class PuzzleInfo:
+-    var id: String = ""
+-    var name: String = ""
+-    var source: PuzzleSource = PuzzleSource.Internal
+-    var completed: bool
+-    var code: String
+-    var code_variants: Dictionary = {}
+-    var active_variant: String = ""
+-    var variant_order: Array = []
+-    var solution_code: String
+-    var code_size: int
+-    var code_instructions: float
+-    var area_size: int
+-    var is_anim: bool
+-    var anim_frames: int
+-    var anim_fps: int
+-    var has_challenge: bool
+-    var challenge_complete: bool
++	var id: String = ""
++	var name: String = ""
++	var source: PuzzleSource = PuzzleSource.Internal
++	var completed: bool
++	var code: String
++	var code_variants: Dictionary = {}
++	var active_variant: String = ""
++	var variant_order: Array = []
++	var solution_code: String
++	var code_size: int
++	var code_instructions: float
++	var area_size: int
++	var is_anim: bool
++	var anim_frames: int
++	var anim_fps: int
++	var has_challenge: bool
++	var challenge_complete: bool
+ 
+ 
+ const PROGRESS_PATH = "user://progress.dat"
+@@ -96,537 +96,541 @@ var current_set: String
+ var load_result: Error = Error.OK
+ 
+ func _ready() -> void :
+-    load_config()
++	load_config()
+ 
+ func reset_progress() -> void :
+-    activated_apps.clear()
+-    activated_features.clear()
+-    active_sets.clear()
+-    all_puzzles.clear()
++	activated_apps.clear()
++	activated_features.clear()
++	active_sets.clear()
++	all_puzzles.clear()
+ 
+-    save_config()
++	save_config()
+ 
+ func load_config() -> void :
+-    _config = ConfigFile.new()
+-    load_result = _config.load(PROGRESS_PATH)
++	_config = ConfigFile.new()
++	load_result = _config.load(PROGRESS_PATH)
+ 
+-    var empty_apps: Array[String] = []
+-    activated_apps = _config.get_value(SECTION_APPS, KEY_ACTIVATED_APPS, empty_apps)
+-    activated_features = _config.get_value(SECTION_APPS, KEY_ACTIVATED_FEATURES, empty_apps)
++	var empty_apps: Array[String] = []
++	activated_apps = _config.get_value(SECTION_APPS, KEY_ACTIVATED_APPS, empty_apps)
++	activated_features = _config.get_value(SECTION_APPS, KEY_ACTIVATED_FEATURES, empty_apps)
+ 
+-    var empty_sets: Array[String] = []
+-    active_sets = _config.get_value(SECTION_SETS, KEY_ACTIVE, empty_sets)
++	var empty_sets: Array[String] = []
++	active_sets = _config.get_value(SECTION_SETS, KEY_ACTIVE, empty_sets)
+ 
+-    all_puzzles = _config.get_value(SECTION_PUZZLES, KEY_ALL, [])
++	all_puzzles = _config.get_value(SECTION_PUZZLES, KEY_ALL, [])
+ 
+-    current_puzzle = PuzzleInfo.new()
+-    current_puzzle_src = PuzzleSource.Internal
++	current_puzzle = PuzzleInfo.new()
++	current_puzzle_src = PuzzleSource.Internal
+ 
+ func save_config() -> void :
+-    _config.set_value(SECTION_APPS, KEY_ACTIVATED_APPS, activated_apps)
+-    _config.set_value(SECTION_APPS, KEY_ACTIVATED_FEATURES, activated_features)
++	_config.set_value(SECTION_APPS, KEY_ACTIVATED_APPS, activated_apps)
++	_config.set_value(SECTION_APPS, KEY_ACTIVATED_FEATURES, activated_features)
+ 
+-    _config.set_value(SECTION_SETS, KEY_ACTIVE, active_sets)
+-    _config.set_value(SECTION_PUZZLES, KEY_ALL, all_puzzles)
++	_config.set_value(SECTION_SETS, KEY_ACTIVE, active_sets)
++	_config.set_value(SECTION_PUZZLES, KEY_ALL, all_puzzles)
+ 
+-    _config.save(PROGRESS_PATH)
++	_config.save(PROGRESS_PATH)
+ 
+ func is_app_activated(app_name: String) -> bool:
+-    return activated_apps.has(app_name)
++	return activated_apps.has(app_name)
+ 
+ func activate_app(app_name: String) -> void :
+-    if not activated_apps.has(app_name):
+-        activated_apps.append(app_name)
+-        save_config()
++	if not activated_apps.has(app_name):
++		activated_apps.append(app_name)
++		save_config()
+ 
+ func is_feature_activated(feature_name: String) -> bool:
+-    return activated_features.has(feature_name)
++	return activated_features.has(feature_name)
+ 
+ func activate_feature(feature_name: String) -> void :
+-    if not activated_features.has(feature_name):
+-        activated_features.append(feature_name)
+-        save_config()
++	if not activated_features.has(feature_name):
++		activated_features.append(feature_name)
++		save_config()
+ 
+ func get_story_value(key: String) -> String:
+-    return _config.get_value(SECTION_STORY, key, "")
++	return _config.get_value(SECTION_STORY, key, "")
+ 
+ func set_story_value(key: String, val: String, save_now: bool) -> void :
+-    _config.set_value(SECTION_STORY, key, val)
++	_config.set_value(SECTION_STORY, key, val)
+ 
+-    if save_now:
+-        save_config()
++	if save_now:
++		save_config()
+ 
+ 
+ func is_set_active(set_name: String) -> bool:
+-    return active_sets.has(set_name)
++	return active_sets.has(set_name)
+ 
+ func mark_set_as_active(set_name: String) -> void :
+-    if not active_sets.has(set_name):
+-        active_sets.append(set_name)
+-        save_config()
++	if not active_sets.has(set_name):
++		active_sets.append(set_name)
++		save_config()
+ 
+ enum Completeness
+ {
+-    None, 
+-    AllLevels, 
+-    AllLevelsAndChallenges
++	None, 
++	AllLevels, 
++	AllLevelsAndChallenges
+ }
+ func is_set_partially_complete(set_name, allowed_incomplete: int) -> bool:
+-    var info: Dictionary = get_set_completion_info(set_name)
+-    var count: int = info.get("level_count", 0)
+-    var complete: int = info.get("complete_count", 0)
++	var info: Dictionary = get_set_completion_info(set_name)
++	var count: int = info.get("level_count", 0)
++	var complete: int = info.get("complete_count", 0)
+ 
+-    if info.is_empty():
+-        return false
++	if info.is_empty():
++		return false
+ 
+-    return (complete + allowed_incomplete) >= count
++	return (complete + allowed_incomplete) >= count
+ 
+ func is_set_complete(set_name: String, including_challenges: bool = false) -> bool:
+-    var c: Completeness = get_set_completeness(set_name)
++	var c: Completeness = get_set_completeness(set_name)
+ 
+-    if including_challenges:
+-        return c == Completeness.AllLevelsAndChallenges
++	if including_challenges:
++		return c == Completeness.AllLevelsAndChallenges
+ 
+-    return c != Completeness.None
++	return c != Completeness.None
+ 
+ func get_set_completeness(set_name: String) -> Completeness:
+-    var info: Dictionary = get_set_completion_info(set_name)
+-    return info.get("completeness", Completeness.None)
++	var info: Dictionary = get_set_completion_info(set_name)
++	return info.get("completeness", Completeness.None)
+ 
+ func get_set_completion_info(set_name: String) -> Dictionary:
+-    var ret = {}
++	var ret = {}
+ 
+-    if not active_sets.has(set_name):
+-        return ret
++	if not active_sets.has(set_name):
++		return ret
+ 
+-    var list_path: String = SET_LIST
+-    if Main.has_feature(Main.FEATURE_DEMO):
+-            list_path = SET_LIST_DEMO
++	var list_path: String = SET_LIST
++	if Main.has_feature(Main.FEATURE_DEMO):
++			list_path = SET_LIST_DEMO
+ 
+-    var set_list: VoxelGameLevelSetList = load(list_path)
+-    var target_set: VoxelGameLevelSet = null
++	var set_list: VoxelGameLevelSetList = load(list_path)
++	
++	if set_list == null:
++		print("Error: Failed to load set list from ", list_path)
++		return ret
++	var target_set: VoxelGameLevelSet = null
+ 
+-    for lvl_set in set_list.sets:
+-        if lvl_set.set_id == set_name:
+-            target_set = lvl_set
+-            break
++	for lvl_set in set_list.sets:
++		if lvl_set.set_id == set_name:
++			target_set = lvl_set
++			break
+ 
+-    if target_set == null:
+-        return ret
++	if target_set == null:
++		return ret
+ 
+-    var complete_count: int = 0
++	var complete_count: int = 0
+ 
+-    var challenge_count: int = 0
+-    var complete_challenge_count: int = 0
++	var challenge_count: int = 0
++	var complete_challenge_count: int = 0
+ 
+-    for lvl: String in target_set.levels:
+-        var info: PuzzleInfo = get_puzzle(lvl, PuzzleSource.Internal)
+-        if info.has_challenge:
+-            challenge_count += 1
++	for lvl: String in target_set.levels:
++		var info: PuzzleInfo = get_puzzle(lvl, PuzzleSource.Internal)
++		if info.has_challenge:
++			challenge_count += 1
+ 
+-        var data: Dictionary = get_level_progress(lvl, PuzzleSource.Internal)
+-        if not data.is_empty():
+-            complete_count += 1
+-            var challenge_complete: bool = data.get(PUZZLE_CHALLENGE_COMPLETE, false)
+-            if challenge_complete:
+-                complete_challenge_count += 1
++		var data: Dictionary = get_level_progress(lvl, PuzzleSource.Internal)
++		if not data.is_empty():
++			complete_count += 1
++			var challenge_complete: bool = data.get(PUZZLE_CHALLENGE_COMPLETE, false)
++			if challenge_complete:
++				complete_challenge_count += 1
+ 
+-    ret["level_count"] = target_set.levels.size()
+-    ret["complete_count"] = complete_count
+-    ret["challenge_count"] = challenge_count
+-    ret["complete_challenge_count"] = complete_challenge_count
++	ret["level_count"] = target_set.levels.size()
++	ret["complete_count"] = complete_count
++	ret["challenge_count"] = challenge_count
++	ret["complete_challenge_count"] = complete_challenge_count
+ 
+-    if challenge_count > 0 and complete_challenge_count >= challenge_count:
+-        ret["completeness"] = Completeness.AllLevelsAndChallenges
+-    elif complete_count >= target_set.levels.size():
+-        ret["completeness"] = Completeness.AllLevels
+-    else:
+-        ret["completeness"] = Completeness.None
++	if challenge_count > 0 and complete_challenge_count >= challenge_count:
++		ret["completeness"] = Completeness.AllLevelsAndChallenges
++	elif complete_count >= target_set.levels.size():
++		ret["completeness"] = Completeness.AllLevels
++	else:
++		ret["completeness"] = Completeness.None
+ 
+-    return ret
++	return ret
+ 
+ func get_overall_completeness() -> Completeness:
+-    var list_path: String = SET_LIST
+-    if Main.has_feature(Main.FEATURE_DEMO):
+-            list_path = SET_LIST_DEMO
++	var list_path: String = SET_LIST
++	if Main.has_feature(Main.FEATURE_DEMO):
++			list_path = SET_LIST_DEMO
+ 
+-    var set_list: VoxelGameLevelSetList = load(list_path)
++	var set_list: VoxelGameLevelSetList = load(list_path)
+ 
+-    var has_incomplete_set: bool = false
+-    var has_incomplete_challenge_set: bool = false
++	var has_incomplete_set: bool = false
++	var has_incomplete_challenge_set: bool = false
+ 
+-    for lvl_set in set_list.sets:
+-        var info: Dictionary = get_set_completion_info(lvl_set.set_id)
+-        var set_c: Completeness = info.get("completeness", Completeness.None)
+-        var challenge_count: int = info.get("challenge_count", 0)
++	for lvl_set in set_list.sets:
++		var info: Dictionary = get_set_completion_info(lvl_set.set_id)
++		var set_c: Completeness = info.get("completeness", Completeness.None)
++		var challenge_count: int = info.get("challenge_count", 0)
+ 
+-        if challenge_count > 0 and set_c != Completeness.AllLevelsAndChallenges:
+-            has_incomplete_challenge_set = true
++		if challenge_count > 0 and set_c != Completeness.AllLevelsAndChallenges:
++			has_incomplete_challenge_set = true
+ 
+-        if set_c == Completeness.None:
+-            has_incomplete_set = true
+-            break
++		if set_c == Completeness.None:
++			has_incomplete_set = true
++			break
+ 
+ 
+-    if not has_incomplete_challenge_set:
+-        return Completeness.AllLevelsAndChallenges
+-    elif not has_incomplete_set:
+-        return Completeness.AllLevels
++	if not has_incomplete_challenge_set:
++		return Completeness.AllLevelsAndChallenges
++	elif not has_incomplete_set:
++		return Completeness.AllLevels
+ 
+-    return Completeness.None
++	return Completeness.None
+ 
+ 
+ func get_puzzle_json(file_with_extension: String, source: PuzzleSource) -> String:
+ 
+-    var filepath = "res://Puzzles/%s" % file_with_extension
+-    if Main.has_feature(Main.FEATURE_DEMO):
+-        filepath = "res://DemoPuzzles/%s" % file_with_extension
++	var filepath = "res://Puzzles/%s" % file_with_extension
++	if Main.has_feature(Main.FEATURE_DEMO):
++		filepath = "res://DemoPuzzles/%s" % file_with_extension
+ 
+-    if source == PuzzleSource.Player or \
++	if source == PuzzleSource.Player or \
+ source == PuzzleSource.Downloaded:
+-        filepath = "user://%s" % file_with_extension
++		filepath = "user://%s" % file_with_extension
+ 
+ 
+ 
+-    var file = FileAccess.open(filepath, FileAccess.READ)
+-    if file != null:
+-        var json_string = file.get_as_text()
+-        return json_string
++	var file = FileAccess.open(filepath, FileAccess.READ)
++	if file != null:
++		var json_string = file.get_as_text()
++		return json_string
+ 
+-    return ""
++	return ""
+ 
+ func get_puzzle(file_with_extension: String, source: PuzzleSource) -> PuzzleInfo:
+-    var json_string: String = get_puzzle_json(file_with_extension, source)
+-    return get_puzzle_from_file_content(json_string, file_with_extension, source)
++	var json_string: String = get_puzzle_json(file_with_extension, source)
++	return get_puzzle_from_file_content(json_string, file_with_extension, source)
+ 
+ 
+ func get_puzzle_from_file_content(json_string: String, id: String, source: PuzzleSource) -> PuzzleInfo:
+-    var data_dict = JSON.parse_string(json_string)
++	var data_dict = JSON.parse_string(json_string)
+ 
+-    var info: PuzzleInfo = PuzzleInfo.new()
+-    info.source = source
+-    info.id = id
+-    info.name = data_dict.get(PUZZLE_NAME, id)
+-    info.area_size = data_dict.get(PUZZLE_SIZE, 3)
+-    info.is_anim = data_dict.get(PUZZLE_IS_ANIM, false)
+-    info.anim_frames = data_dict.get(PUZZLE_ANIM_FRAMES, 1)
+-    info.anim_fps = data_dict.get(PUZZLE_ANIM_FPS, 12)
+-    _set_code(info, data_dict, "return 1")
++	var info: PuzzleInfo = PuzzleInfo.new()
++	info.source = source
++	info.id = id
++	info.name = data_dict.get(PUZZLE_NAME, id)
++	info.area_size = data_dict.get(PUZZLE_SIZE, 3)
++	info.is_anim = data_dict.get(PUZZLE_IS_ANIM, false)
++	info.anim_frames = data_dict.get(PUZZLE_ANIM_FRAMES, 1)
++	info.anim_fps = data_dict.get(PUZZLE_ANIM_FPS, 12)
++	_set_code(info, data_dict, "return 1")
+ 
+-    var challenge = data_dict.get(PUZZLE_CHALLENGE, {})
+-    info.has_challenge = not challenge.is_empty()
++	var challenge = data_dict.get(PUZZLE_CHALLENGE, {})
++	info.has_challenge = not challenge.is_empty()
+ 
+-    info.solution_code = info.code
++	info.solution_code = info.code
+ 
+-    return info
++	return info
+ 
+ func _set_code(info: PuzzleInfo, dict: Dictionary, fallback_code: String) -> void :
+-    info.code_variants = dict.get(PUZZLE_CODE_VARIANTS, {})
+-    info.active_variant = dict.get(PUZZLE_ACTIVE_VARIANT, "")
+-    info.variant_order = dict.get(PUZZLE_VARIANT_ORDER, [])
+-
+-    if info.code_variants.has(info.active_variant):
+-        var content: String = info.code_variants[info.active_variant]
+-        if content.is_empty():
+-            info.code_variants[info.active_variant] = dict.get(PUZZLE_CODE, fallback_code)
+-    elif info.code_variants.size() > 0:
+-        info.active_variant = info.code_variants.keys()[0]
+-        var content: String = info.code_variants[info.active_variant]
+-        if content.is_empty():
+-            info.code_variants[info.active_variant] = dict.get(PUZZLE_CODE, fallback_code)
+-    else:
+-        info.code_variants = {"code": dict.get(PUZZLE_CODE, fallback_code)}
+-        info.active_variant = "code"
+-
+-    info.code = info.code_variants[info.active_variant]
++	info.code_variants = dict.get(PUZZLE_CODE_VARIANTS, {})
++	info.active_variant = dict.get(PUZZLE_ACTIVE_VARIANT, "")
++	info.variant_order = dict.get(PUZZLE_VARIANT_ORDER, [])
++
++	if info.code_variants.has(info.active_variant):
++		var content: String = info.code_variants[info.active_variant]
++		if content.is_empty():
++			info.code_variants[info.active_variant] = dict.get(PUZZLE_CODE, fallback_code)
++	elif info.code_variants.size() > 0:
++		info.active_variant = info.code_variants.keys()[0]
++		var content: String = info.code_variants[info.active_variant]
++		if content.is_empty():
++			info.code_variants[info.active_variant] = dict.get(PUZZLE_CODE, fallback_code)
++	else:
++		info.code_variants = {"code": dict.get(PUZZLE_CODE, fallback_code)}
++		info.active_variant = "code"
++
++	info.code = info.code_variants[info.active_variant]
+ 
+ 
+ func set_puzzle(file_with_extension: String, source: PuzzleSource) -> void :
+-    var filepath = "res://Puzzles/%s" % file_with_extension
+-    if Main.has_feature(Main.FEATURE_DEMO):
+-        filepath = "res://DemoPuzzles/%s" % file_with_extension
++	var filepath = "res://Puzzles/%s" % file_with_extension
++	if Main.has_feature(Main.FEATURE_DEMO):
++		filepath = "res://DemoPuzzles/%s" % file_with_extension
+ 
+-    if source == PuzzleSource.Player or source == PuzzleSource.Downloaded:
+-        filepath = "user://%s" % file_with_extension
++	if source == PuzzleSource.Player or source == PuzzleSource.Downloaded:
++		filepath = "user://%s" % file_with_extension
+ 
+-    print("trying to set puzzle from %s" % filepath)
++	print("trying to set puzzle from %s" % filepath)
+ 
+-    var file = FileAccess.open(filepath, FileAccess.READ)
++	var file = FileAccess.open(filepath, FileAccess.READ)
+ 
+-    if file == null:
+-        print("error opening file: %s" % FileAccess.get_open_error())
++	if file == null:
++		print("error opening file: %s" % FileAccess.get_open_error())
+ 
+-    var json_string = file.get_as_text()
+-    var data_dict = JSON.parse_string(json_string)
++	var json_string = file.get_as_text()
++	var data_dict = JSON.parse_string(json_string)
+ 
+-    current_puzzle = PuzzleInfo.new()
+-    current_puzzle.source = source
+-    current_puzzle.id = file_with_extension
+-    current_puzzle.name = data_dict.get(PUZZLE_NAME, file_with_extension)
+-    current_puzzle.area_size = data_dict.get(PUZZLE_SIZE, 3)
+-    current_puzzle.is_anim = data_dict.get(PUZZLE_IS_ANIM, false)
+-    current_puzzle.anim_frames = data_dict.get(PUZZLE_ANIM_FRAMES, 1)
+-    current_puzzle.anim_fps = data_dict.get(PUZZLE_ANIM_FPS, 12)
++	current_puzzle = PuzzleInfo.new()
++	current_puzzle.source = source
++	current_puzzle.id = file_with_extension
++	current_puzzle.name = data_dict.get(PUZZLE_NAME, file_with_extension)
++	current_puzzle.area_size = data_dict.get(PUZZLE_SIZE, 3)
++	current_puzzle.is_anim = data_dict.get(PUZZLE_IS_ANIM, false)
++	current_puzzle.anim_frames = data_dict.get(PUZZLE_ANIM_FRAMES, 1)
++	current_puzzle.anim_fps = data_dict.get(PUZZLE_ANIM_FPS, 12)
+ 
+-    current_puzzle_src = source
++	current_puzzle_src = source
+ 
+-    var challenge = data_dict.get(PUZZLE_CHALLENGE, {})
+-    current_puzzle.has_challenge = not challenge.is_empty()
++	var challenge = data_dict.get(PUZZLE_CHALLENGE, {})
++	current_puzzle.has_challenge = not challenge.is_empty()
+ 
+ 
+ 
+-    if source == PuzzleSource.Internal:
+-        var start_code: String = data_dict.get(PUZZLE_STARTING_CODE, "-- good luck!\nreturn 1")
+-        current_puzzle.code_variants = {"code": start_code}
+-        current_puzzle.active_variant = "code"
+-        current_puzzle.solution_code = data_dict.get(PUZZLE_CODE, "")
+-    elif source == PuzzleSource.Player or source == PuzzleSource.Downloaded:
+-        current_puzzle.code_variants = {"code": "return 1"}
+-        current_puzzle.active_variant = "code"
+-        current_puzzle.solution_code = data_dict.get(PUZZLE_CODE, "")
++	if source == PuzzleSource.Internal:
++		var start_code: String = data_dict.get(PUZZLE_STARTING_CODE, "-- good luck!\nreturn 1")
++		current_puzzle.code_variants = {"code": start_code}
++		current_puzzle.active_variant = "code"
++		current_puzzle.solution_code = data_dict.get(PUZZLE_CODE, "")
++	elif source == PuzzleSource.Player or source == PuzzleSource.Downloaded:
++		current_puzzle.code_variants = {"code": "return 1"}
++		current_puzzle.active_variant = "code"
++		current_puzzle.solution_code = data_dict.get(PUZZLE_CODE, "")
+ 
+-    _try_fill_current_puzzle_progress()
++	_try_fill_current_puzzle_progress()
+ 
+-func set_puzzle_edit(file_with_extension: String) -> void :
+-    var filepath = "user://%s" % file_with_extension
++func set_puzzle_edit(file_with_extension: String, filepathvalue: String = "user://%s") -> void :
++	var filepath = filepathvalue % file_with_extension
++	var file = FileAccess.open(filepath, FileAccess.READ)
++	
++	print(file)
++	var json_string = file.get_as_text()
++	var data_dict = JSON.parse_string(json_string)
+ 
+-    var file = FileAccess.open(filepath, FileAccess.READ)
++	current_puzzle = PuzzleInfo.new()
++	current_puzzle.source = PuzzleSource.Player
++	current_puzzle.id = file_with_extension
++	current_puzzle.name = file_with_extension
++	current_puzzle.area_size = data_dict.get(PUZZLE_SIZE, 3)
++	current_puzzle.is_anim = data_dict.get(PUZZLE_IS_ANIM, false)
++	current_puzzle.anim_frames = data_dict.get(PUZZLE_ANIM_FRAMES, 1)
++	current_puzzle.anim_fps = data_dict.get(PUZZLE_ANIM_FPS, 12)
+ 
+-    var json_string = file.get_as_text()
+-    var data_dict = JSON.parse_string(json_string)
++	current_puzzle.has_challenge = false
+ 
+-    current_puzzle = PuzzleInfo.new()
+-    current_puzzle.source = PuzzleSource.Player
+-    current_puzzle.id = file_with_extension
+-    current_puzzle.name = file_with_extension
+-    current_puzzle.area_size = data_dict.get(PUZZLE_SIZE, 3)
+-    current_puzzle.is_anim = data_dict.get(PUZZLE_IS_ANIM, false)
+-    current_puzzle.anim_frames = data_dict.get(PUZZLE_ANIM_FRAMES, 1)
+-    current_puzzle.anim_fps = data_dict.get(PUZZLE_ANIM_FPS, 12)
++	_set_code(current_puzzle, data_dict, "return 1")
+ 
+-    current_puzzle.has_challenge = false
++	current_puzzle.solution_code = ""
+ 
+-    _set_code(current_puzzle, data_dict, "return 1")
+-
+-    current_puzzle.solution_code = ""
+-
+-    current_puzzle_src = PuzzleSource.Player
++	current_puzzle_src = PuzzleSource.Player
+ 
+ 
+ 
+ 
+ func set_puzzle_player(name: String) -> void :
+-    for d: Dictionary in all_puzzles:
+-        var id: String = d.get(PUZZLE_ID, "")
+-        var src: PuzzleSource = d.get(PUZZLE_SOURCE, PuzzleSource.Internal)
++	for d: Dictionary in all_puzzles:
++		var id: String = d.get(PUZZLE_ID, "")
++		var src: PuzzleSource = d.get(PUZZLE_SOURCE, PuzzleSource.Internal)
+ 
+-        if id == name and src == PuzzleSource.Player:
+-            _set_current_puzzle_from_dict(d)
+-            break
++		if id == name and src == PuzzleSource.Player:
++			_set_current_puzzle_from_dict(d)
++			break
+ 
+ func set_puzzle_player_new() -> void :
+-    current_puzzle = PuzzleInfo.new()
+-    current_puzzle.id = Progress.FREE_EDIT_ID
+-    current_puzzle.name = Progress.FREE_EDIT_ID
+-    current_puzzle.source = PuzzleSource.Player
+-    current_puzzle.code = "return 1"
+-    current_puzzle.code_variants = {"code": current_puzzle.code}
+-    current_puzzle.active_variant = "code"
+-    current_puzzle.variant_order = ["code"]
+-    current_puzzle.area_size = 3
+-    current_puzzle.is_anim = false
+-    current_puzzle.anim_frames = 1
+-    current_puzzle.anim_fps = 12.0
+-    current_puzzle.completed = false
+-    current_puzzle.code_size = -1
+-    current_puzzle.code_instructions = -1
+-    current_puzzle.has_challenge = false
+-
+-    current_puzzle_src = PuzzleSource.Player
+-
+-    _try_fill_current_puzzle_settings()
+-    _try_fill_current_puzzle_progress()
++	current_puzzle = PuzzleInfo.new()
++	current_puzzle.id = Progress.FREE_EDIT_ID
++	current_puzzle.name = Progress.FREE_EDIT_ID
++	current_puzzle.source = PuzzleSource.Player
++	current_puzzle.code = "return 1"
++	current_puzzle.code_variants = {"code": current_puzzle.code}
++	current_puzzle.active_variant = "code"
++	current_puzzle.variant_order = ["code"]
++	current_puzzle.area_size = 3
++	current_puzzle.is_anim = false
++	current_puzzle.anim_frames = 1
++	current_puzzle.anim_fps = 12.0
++	current_puzzle.completed = false
++	current_puzzle.code_size = -1
++	current_puzzle.code_instructions = -1
++	current_puzzle.has_challenge = false
++
++	current_puzzle_src = PuzzleSource.Player
++
++	_try_fill_current_puzzle_settings()
++	_try_fill_current_puzzle_progress()
+ 
+ 
+ func _set_current_puzzle_from_dict(info: Dictionary) -> void :
+-    current_puzzle = PuzzleInfo.new()
+-    current_puzzle.id = info.get(PUZZLE_ID, "")
+-    current_puzzle.name = info.get(PUZZLE_NAME, current_puzzle.id)
+-    current_puzzle.source = info.get(PUZZLE_SOURCE, PuzzleSource.Internal)
+-    current_puzzle.area_size = info.get(PUZZLE_SIZE, 3)
+-    current_puzzle.is_anim = info.get(PUZZLE_IS_ANIM, false)
+-    current_puzzle.anim_frames = info.get(PUZZLE_ANIM_FRAMES, 1)
+-    current_puzzle.anim_fps = info.get(PUZZLE_ANIM_FPS, 12)
++	current_puzzle = PuzzleInfo.new()
++	current_puzzle.id = info.get(PUZZLE_ID, "")
++	current_puzzle.name = info.get(PUZZLE_NAME, current_puzzle.id)
++	current_puzzle.source = info.get(PUZZLE_SOURCE, PuzzleSource.Internal)
++	current_puzzle.area_size = info.get(PUZZLE_SIZE, 3)
++	current_puzzle.is_anim = info.get(PUZZLE_IS_ANIM, false)
++	current_puzzle.anim_frames = info.get(PUZZLE_ANIM_FRAMES, 1)
++	current_puzzle.anim_fps = info.get(PUZZLE_ANIM_FPS, 12)
+ 
+-    current_puzzle_src = current_puzzle.source
++	current_puzzle_src = current_puzzle.source
+ 
+-    _fill_current_puzzle_progress(info)
++	_fill_current_puzzle_progress(info)
+ 
+ func _fill_current_puzzle_progress(info: Dictionary) -> void :
+-    _set_code(current_puzzle, info, current_puzzle.code)
+-    current_puzzle.completed = info.get(PUZZLE_COMPLETED, false)
+-    current_puzzle.code_size = info.get(PUZZLE_CODE_SIZE, -1)
+-    current_puzzle.code_instructions = info.get(PUZZLE_CODE_INSTRUCTIONS, -1.0)
+-    current_puzzle.challenge_complete = info.get(PUZZLE_CHALLENGE_COMPLETE, false)
++	_set_code(current_puzzle, info, current_puzzle.code)
++	current_puzzle.completed = info.get(PUZZLE_COMPLETED, false)
++	current_puzzle.code_size = info.get(PUZZLE_CODE_SIZE, -1)
++	current_puzzle.code_instructions = info.get(PUZZLE_CODE_INSTRUCTIONS, -1.0)
++	current_puzzle.challenge_complete = info.get(PUZZLE_CHALLENGE_COMPLETE, false)
+ 
+ func _try_fill_current_puzzle_progress() -> void :
+-    var progress_dict: Dictionary = {}
++	var progress_dict: Dictionary = {}
+ 
+-    for d: Dictionary in all_puzzles:
+-        var id: String = d.get(PUZZLE_ID, "")
+-        var src: PuzzleSource = d.get(PUZZLE_SOURCE, PuzzleSource.Internal)
++	for d: Dictionary in all_puzzles:
++		var id: String = d.get(PUZZLE_ID, "")
++		var src: PuzzleSource = d.get(PUZZLE_SOURCE, PuzzleSource.Internal)
+ 
+-        if id == current_puzzle.id and src == current_puzzle.source:
+-            _fill_current_puzzle_progress(d)
+-            break
++		if id == current_puzzle.id and src == current_puzzle.source:
++			_fill_current_puzzle_progress(d)
++			break
+ 
+ func _fill_current_puzzle_settings(info: Dictionary) -> void :
+-    current_puzzle.area_size = info.get(PUZZLE_SIZE, current_puzzle.area_size)
+-    current_puzzle.is_anim = info.get(PUZZLE_IS_ANIM, current_puzzle.is_anim)
+-    current_puzzle.anim_frames = info.get(PUZZLE_ANIM_FRAMES, current_puzzle.anim_frames)
+-    current_puzzle.anim_fps = info.get(PUZZLE_ANIM_FPS, current_puzzle.anim_fps)
++	current_puzzle.area_size = info.get(PUZZLE_SIZE, current_puzzle.area_size)
++	current_puzzle.is_anim = info.get(PUZZLE_IS_ANIM, current_puzzle.is_anim)
++	current_puzzle.anim_frames = info.get(PUZZLE_ANIM_FRAMES, current_puzzle.anim_frames)
++	current_puzzle.anim_fps = info.get(PUZZLE_ANIM_FPS, current_puzzle.anim_fps)
+ 
+ 
+ func _try_fill_current_puzzle_settings() -> void :
+-    var progress_dict: Dictionary = {}
++	var progress_dict: Dictionary = {}
+ 
+-    for d: Dictionary in all_puzzles:
+-        var id: String = d.get(PUZZLE_ID, "")
+-        var src: PuzzleSource = d.get(PUZZLE_SOURCE, PuzzleSource.Internal)
++	for d: Dictionary in all_puzzles:
++		var id: String = d.get(PUZZLE_ID, "")
++		var src: PuzzleSource = d.get(PUZZLE_SOURCE, PuzzleSource.Internal)
+ 
+-        if id == current_puzzle.id and src == current_puzzle.source:
+-            _fill_current_puzzle_settings(d)
+-            break
++		if id == current_puzzle.id and src == current_puzzle.source:
++			_fill_current_puzzle_settings(d)
++			break
+ 
+ func get_starting_code_for_current_puzzle() -> String:
+-    var code = "return 1"
+-    var json: String = get_puzzle_json(current_puzzle.id, current_puzzle.source)
+-    if not json.is_empty():
+-        var dict: Dictionary = JSON.parse_string(json)
+-        code = dict.get(PUZZLE_STARTING_CODE, code)
++	var code = "return 1"
++	var json: String = get_puzzle_json(current_puzzle.id, current_puzzle.source)
++	if not json.is_empty():
++		var dict: Dictionary = JSON.parse_string(json)
++		code = dict.get(PUZZLE_STARTING_CODE, code)
+ 
+-    return code
++	return code
+ 
+ func _current_puzzle_to_dict() -> Dictionary:
+-    return puzzle_to_dict(current_puzzle, true, false)
++	return puzzle_to_dict(current_puzzle, true, false)
+ 
+ func puzzle_to_dict(puzzle: PuzzleInfo, store_variants: bool, store_code: bool) -> Dictionary:
+-    var ret: = {
+-        PUZZLE_ID: puzzle.id, 
+-        PUZZLE_SOURCE: puzzle.source, 
+-        PUZZLE_SIZE: puzzle.area_size, 
+-        PUZZLE_IS_ANIM: puzzle.is_anim, 
+-        PUZZLE_ANIM_FRAMES: puzzle.anim_frames, 
+-        PUZZLE_ANIM_FPS: puzzle.anim_fps, 
+-        PUZZLE_COMPLETED: puzzle.completed, 
+-        PUZZLE_CODE_SIZE: puzzle.code_size, 
+-        PUZZLE_CODE_INSTRUCTIONS: puzzle.code_instructions, 
+-    }
+-
+-    if puzzle.has_challenge:
+-        ret[PUZZLE_CHALLENGE_COMPLETE] = puzzle.challenge_complete
+-    else:
+-        ret[PUZZLE_CHALLENGE_COMPLETE] = false
+-
+-    if store_variants:
+-        ret[PUZZLE_CODE_VARIANTS] = puzzle.code_variants
+-        ret[PUZZLE_ACTIVE_VARIANT] = puzzle.active_variant
+-        ret[PUZZLE_VARIANT_ORDER] = puzzle.variant_order
+-
+-    if store_code:
+-        ret[PUZZLE_CODE] = puzzle.code
+-
+-    return ret
++	var ret: = {
++		PUZZLE_ID: puzzle.id, 
++		PUZZLE_SOURCE: puzzle.source, 
++		PUZZLE_SIZE: puzzle.area_size, 
++		PUZZLE_IS_ANIM: puzzle.is_anim, 
++		PUZZLE_ANIM_FRAMES: puzzle.anim_frames, 
++		PUZZLE_ANIM_FPS: puzzle.anim_fps, 
++		PUZZLE_COMPLETED: puzzle.completed, 
++		PUZZLE_CODE_SIZE: puzzle.code_size, 
++		PUZZLE_CODE_INSTRUCTIONS: puzzle.code_instructions, 
++	}
++
++	if puzzle.has_challenge:
++		ret[PUZZLE_CHALLENGE_COMPLETE] = puzzle.challenge_complete
++	else:
++		ret[PUZZLE_CHALLENGE_COMPLETE] = false
++
++	if store_variants:
++		ret[PUZZLE_CODE_VARIANTS] = puzzle.code_variants
++		ret[PUZZLE_ACTIVE_VARIANT] = puzzle.active_variant
++		ret[PUZZLE_VARIANT_ORDER] = puzzle.variant_order
++
++	if store_code:
++		ret[PUZZLE_CODE] = puzzle.code
++
++	return ret
+ 
+ 
+ func download_puzzle(content: String, post_id: int, puzzle_name: String) -> String:
+-    var puz_filename: String = "dl-%d.vox" % post_id
++	var puz_filename: String = "dl-%d.vox" % post_id
+ 
+-    var puzzle_info: PuzzleInfo = get_puzzle_from_file_content(content, str(post_id), PuzzleSource.Downloaded)
+-    var file: FileAccess = FileAccess.open("user://%s" % puz_filename, FileAccess.WRITE)
+-    var data: Dictionary = puzzle_to_dict(puzzle_info, false, true)
+-    data[PUZZLE_NAME] = puzzle_name
+-    file.store_string(var_to_str(data))
+-    file.close()
++	var puzzle_info: PuzzleInfo = get_puzzle_from_file_content(content, str(post_id), PuzzleSource.Downloaded)
++	var file: FileAccess = FileAccess.open("user://%s" % puz_filename, FileAccess.WRITE)
++	var data: Dictionary = puzzle_to_dict(puzzle_info, false, true)
++	data[PUZZLE_NAME] = puzzle_name
++	file.store_string(var_to_str(data))
++	file.close()
+ 
+-    return puz_filename
++	return puz_filename
+ 
+ func puzzle_completed(code: String, size: int, instructions: float) -> void :
+-    current_puzzle.code = code
+-    current_puzzle.completed = true
+-    current_puzzle.code_size = size
+-    current_puzzle.code_instructions = instructions
++	current_puzzle.code = code
++	current_puzzle.completed = true
++	current_puzzle.code_size = size
++	current_puzzle.code_instructions = instructions
+ 
+-    _apply_current_puzzle()
+-    save_config()
++	_apply_current_puzzle()
++	save_config()
+ 
+ func puzzle_challenge_completed() -> void :
+-    current_puzzle.challenge_complete = true
++	current_puzzle.challenge_complete = true
+ 
+-    _apply_current_puzzle()
+-    save_config()
++	_apply_current_puzzle()
++	save_config()
+ 
+ func puzzle_updated(variants: Dictionary, active_variant: String, variant_order: Array) -> void :
+-    current_puzzle.code_variants = variants.duplicate()
+-    current_puzzle.active_variant = active_variant
+-    current_puzzle.variant_order = variant_order.duplicate()
+-    _apply_current_puzzle()
+-    save_config()
++	current_puzzle.code_variants = variants.duplicate()
++	current_puzzle.active_variant = active_variant
++	current_puzzle.variant_order = variant_order.duplicate()
++	_apply_current_puzzle()
++	save_config()
+ 
+ func puzzle_updated_free(variant_name: String, code: String, area_size: int, anim: bool, frames: int, fps: int) -> void :
+-    current_puzzle.code_variants[variant_name] = code
+-    current_puzzle.active_variant = variant_name
+-    current_puzzle.variant_order = [variant_name]
+-    current_puzzle.area_size = area_size
+-    current_puzzle.is_anim = anim
+-    current_puzzle.anim_frames = frames
+-    current_puzzle.anim_fps = fps
++	current_puzzle.code_variants[variant_name] = code
++	current_puzzle.active_variant = variant_name
++	current_puzzle.variant_order = [variant_name]
++	current_puzzle.area_size = area_size
++	current_puzzle.is_anim = anim
++	current_puzzle.anim_frames = frames
++	current_puzzle.anim_fps = fps
+ 
+-    _apply_current_puzzle()
+-    save_config()
++	_apply_current_puzzle()
++	save_config()
+ 
+ func _apply_current_puzzle() -> void :
+-    var found: bool = false
++	var found: bool = false
+ 
+-    for d: Dictionary in all_puzzles:
+-        var id: String = d.get(PUZZLE_ID, "")
+-        var src: PuzzleSource = d.get(PUZZLE_SOURCE, PuzzleSource.Internal)
++	for d: Dictionary in all_puzzles:
++		var id: String = d.get(PUZZLE_ID, "")
++		var src: PuzzleSource = d.get(PUZZLE_SOURCE, PuzzleSource.Internal)
+ 
+-        if id == current_puzzle.id and src == current_puzzle.source:
+-            d.set(PUZZLE_CODE_VARIANTS, current_puzzle.code_variants)
+-            d.set(PUZZLE_ACTIVE_VARIANT, current_puzzle.active_variant)
+-            d.set(PUZZLE_VARIANT_ORDER, current_puzzle.variant_order)
+-            d.set(PUZZLE_SIZE, current_puzzle.area_size)
+-            d.set(PUZZLE_IS_ANIM, current_puzzle.is_anim)
+-            d.set(PUZZLE_ANIM_FRAMES, current_puzzle.anim_frames)
+-            d.set(PUZZLE_ANIM_FPS, current_puzzle.anim_fps)
+-            d.set(PUZZLE_COMPLETED, current_puzzle.completed)
+-            d.set(PUZZLE_CODE_SIZE, current_puzzle.code_size)
+-            d.set(PUZZLE_CODE_INSTRUCTIONS, current_puzzle.code_instructions)
+-            d.set(PUZZLE_CHALLENGE_COMPLETE, current_puzzle.challenge_complete)
++		if id == current_puzzle.id and src == current_puzzle.source:
++			d.set(PUZZLE_CODE_VARIANTS, current_puzzle.code_variants)
++			d.set(PUZZLE_ACTIVE_VARIANT, current_puzzle.active_variant)
++			d.set(PUZZLE_VARIANT_ORDER, current_puzzle.variant_order)
++			d.set(PUZZLE_SIZE, current_puzzle.area_size)
++			d.set(PUZZLE_IS_ANIM, current_puzzle.is_anim)
++			d.set(PUZZLE_ANIM_FRAMES, current_puzzle.anim_frames)
++			d.set(PUZZLE_ANIM_FPS, current_puzzle.anim_fps)
++			d.set(PUZZLE_COMPLETED, current_puzzle.completed)
++			d.set(PUZZLE_CODE_SIZE, current_puzzle.code_size)
++			d.set(PUZZLE_CODE_INSTRUCTIONS, current_puzzle.code_instructions)
++			d.set(PUZZLE_CHALLENGE_COMPLETE, current_puzzle.challenge_complete)
+ 
+-            found = true
+-            break
++			found = true
++			break
+ 
+-    if not found:
++	if not found:
+ 
+-        var puzzle_dict: Dictionary = _current_puzzle_to_dict()
+-        all_puzzles.append(puzzle_dict)
++		var puzzle_dict: Dictionary = _current_puzzle_to_dict()
++		all_puzzles.append(puzzle_dict)
+ 
+-    save_config()
++	save_config()
+ 
+ 
+ func get_level_progress(puzzle_id: String, puzzle_src: PuzzleSource) -> Dictionary:
+-    var ret: Dictionary = {}
++	var ret: Dictionary = {}
+ 
+-    for d: Dictionary in all_puzzles:
+-        var id: String = d.get(PUZZLE_ID, "")
+-        var src: PuzzleSource = d.get(PUZZLE_SOURCE, PuzzleSource.Internal)
++	for d: Dictionary in all_puzzles:
++		var id: String = d.get(PUZZLE_ID, "")
++		var src: PuzzleSource = d.get(PUZZLE_SOURCE, PuzzleSource.Internal)
+ 
+-        if id == puzzle_id and src == puzzle_src:
+-            if d.get(PUZZLE_COMPLETED, false):
+-                ret[PUZZLE_CODE_SIZE] = d.get(PUZZLE_CODE_SIZE, -1)
+-                ret[PUZZLE_CODE_INSTRUCTIONS] = d.get(PUZZLE_CODE_INSTRUCTIONS, -1.0)
+-                ret[PUZZLE_CHALLENGE_COMPLETE] = d.get(PUZZLE_CHALLENGE_COMPLETE, false)
++		if id == puzzle_id and src == puzzle_src:
++			if d.get(PUZZLE_COMPLETED, false):
++				ret[PUZZLE_CODE_SIZE] = d.get(PUZZLE_CODE_SIZE, -1)
++				ret[PUZZLE_CODE_INSTRUCTIONS] = d.get(PUZZLE_CODE_INSTRUCTIONS, -1.0)
++				ret[PUZZLE_CHALLENGE_COMPLETE] = d.get(PUZZLE_CHALLENGE_COMPLETE, false)
+ 
+-    return ret
++	return ret
+diff --git a/GDSripts/VoxPreview.gd b/GDSripts/VoxPreview.gd
+index 3f83b24..4ea396e 100644
+--- a/GDSripts/VoxPreview.gd
++++ b/GDSripts/VoxPreview.gd
+@@ -1,23 +1,29 @@
+ extends HBoxContainer
+ class_name VoxPreview
++func get_node_async(path: String) -> Node:
++	var node = get_node_or_null(path)
++	while node == null:
++		await get_tree().process_frame
++		node = get_node_or_null(path)
++	return node
+ 
+-@onready var tabs: TabContainer = % Tabs
++@onready var tabs: TabContainer = await get_node_async("Tabs")
+ 
+ @onready var voxel_object: MarginContainer = % "Voxel Object"
+ 
+-@onready var voxel_viewport: SubViewport = % SubViewport
++@onready var voxel_viewport: SubViewport = % "SubViewport"
+ 
+ @onready var voxel_scene: VoxelScene = % VoxelScene
+-@onready var input: PuzzleSceneContainer = % Input
+-@onready var show_bounds_button: TextureButton = % ShowBoundsButton
+-@onready var show_axis_button: TextureButton = % ShowAxisButton
+-@onready var show_rulers_button: TextureButton = % ShowRulersButton
+-@onready var is_ortho_button: TextureButton = % IsOrthoButton
+-@onready var reset_scene_button: TextureButton = % ResetSceneButton
++@onready var input: PuzzleSceneContainer = % "Input"
++@onready var show_bounds_button: TextureButton = % "ShowBoundsButton"
++@onready var show_axis_button: TextureButton = % "ShowAxisButton"
++@onready var show_rulers_button: TextureButton = % "ShowRulersButton"
++@onready var is_ortho_button: TextureButton = % "IsOrthoButton"
++@onready var reset_scene_button: TextureButton = % "ResetSceneButton"
+ 
+ @onready var simple_code_runner: SimpleCodeRunner = % SimpleCodeRunner
+ 
+-@onready var leaderboard: LeaderboardContainer = % Leaderboard
++@onready var leaderboard: LeaderboardContainer = % "Leaderboard"
+ 
+ @export var simple_mode: bool = false
+ @export var allow_zoom: bool = true
+@@ -25,83 +31,83 @@ class_name VoxPreview
+ var _puzzle_id: String = ""
+ 
+ func _ready() -> void :
+-    if input != null:
+-        input.allow_zoom = allow_zoom
+-
+-    if simple_mode:
+-        voxel_object.reparent(self, false)
+-        voxel_object.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+-        voxel_object.show()
+-        tabs.hide()
+-        show_bounds_button.hide()
+-        show_axis_button.hide()
+-        show_rulers_button.hide()
+-        is_ortho_button.hide()
+-        reset_scene_button.hide()
+-        voxel_scene.axis_manager.show_axis = false
+-        voxel_scene.axis_manager.show_bounds = false
+-        voxel_scene.clip_handle_x.hide()
+-        voxel_scene.clip_handle_y.hide()
+-        voxel_scene.clip_handle_z.hide()
+-        input.show_rulers = false
+-        input.queue_redraw()
+-    else:
+-        if tabs != null:
+-            tabs.tab_changed.connect(_tab_changed)
+-
+-        if show_bounds_button:
+-            show_bounds_button.toggled.connect(_show_bounds_toggled)
+-
+-        if show_axis_button:
+-            show_axis_button.toggled.connect(_show_axis_toggled)
+-
+-        if show_rulers_button:
+-            show_rulers_button.toggled.connect(_show_rulers_toggled)
+-
+-        if is_ortho_button:
+-            is_ortho_button.toggled.connect(_is_ortho_toggled)
+-
+-        if reset_scene_button:
+-            reset_scene_button.pressed.connect(_reset_scene_pressed)
++	if input != null:
++		input.allow_zoom = allow_zoom
++
++	if simple_mode:
++		voxel_object.reparent(self, false)
++		voxel_object.size_flags_horizontal = Control.SIZE_EXPAND_FILL
++		voxel_object.show()
++		tabs.hide()
++		show_bounds_button.hide()
++		show_axis_button.hide()
++		show_rulers_button.hide()
++		is_ortho_button.hide()
++		reset_scene_button.hide()
++		voxel_scene.axis_manager.show_axis = false
++		voxel_scene.axis_manager.show_bounds = false
++		voxel_scene.clip_handle_x.hide()
++		voxel_scene.clip_handle_y.hide()
++		voxel_scene.clip_handle_z.hide()
++		input.show_rulers = false
++		input.queue_redraw()
++	else:
++		if tabs != null:
++			tabs.tab_changed.connect(_tab_changed)
++
++		if show_bounds_button:
++			show_bounds_button.toggled.connect(_show_bounds_toggled)
++
++		if show_axis_button:
++			show_axis_button.toggled.connect(_show_axis_toggled)
++
++		if show_rulers_button:
++			show_rulers_button.toggled.connect(_show_rulers_toggled)
++
++		if is_ortho_button:
++			is_ortho_button.toggled.connect(_is_ortho_toggled)
++
++		if reset_scene_button:
++			reset_scene_button.pressed.connect(_reset_scene_pressed)
+ 
+ func _tab_changed(tab: int) -> void :
+-    if tab == 1:
++	if tab == 1:
+ 
+-        leaderboard.show_leaderboard(_puzzle_id)
++		leaderboard.show_leaderboard(_puzzle_id)
+ 
+ func show_with_code(code: String, size: int, anim: bool, frames: int, fps: int) -> void :
+-    tabs.current_tab = 0
+-    simple_code_runner.exec_and_show_from_code(code, size, anim, frames, fps)
++	tabs.current_tab = 0
++	simple_code_runner.exec_and_show_from_code(code, size, anim, frames, fps)
+ 
+ func show_with_file_content(file_content: String, id: String, source: ProgressTracker.PuzzleSource) -> void :
+-    tabs.current_tab = 0
+-    _puzzle_id = id
+-    simple_code_runner.exec_and_show_from_file(file_content, id, source)
++	tabs.current_tab = 0
++	_puzzle_id = id
++	simple_code_runner.exec_and_show_from_file(file_content, id, source)
+ 
+-    var voxel_extents: int = simple_code_runner._puzzle_info.area_size
+-    var cam_d: float = float(voxel_extents + 3) / atan(deg_to_rad(voxel_scene.camera.fov / 2.0))
++	var voxel_extents: int = simple_code_runner._puzzle_info.area_size
++	var cam_d: float = float(voxel_extents + 3) / atan(deg_to_rad(voxel_scene.camera.fov / 2.0))
+ 
+-    voxel_scene.camera.position = Vector3(0.0, 0.0, cam_d)
+-    voxel_scene.set_pitch(deg_to_rad(-22.5), false)
+-    voxel_scene.set_yaw(deg_to_rad(22.5), false)
++	voxel_scene.camera.position = Vector3(0.0, 0.0, cam_d)
++	voxel_scene.set_pitch(deg_to_rad(-22.5), false)
++	voxel_scene.set_yaw(deg_to_rad(22.5), false)
+ 
+ func set_frame_manual(f: int) -> void :
+-    simple_code_runner.set_frame_manual(f)
++	simple_code_runner.set_frame_manual(f)
+ 
+ func _show_bounds_toggled(on: bool) -> void :
+-    voxel_scene.axis_manager.show_bounds = not on
+-    input.queue_redraw()
++	voxel_scene.axis_manager.show_bounds = not on
++	input.queue_redraw()
+ 
+ func _show_axis_toggled(on: bool) -> void :
+-    voxel_scene.show_axis = not on
++	voxel_scene.show_axis = not on
+ 
+ func _show_rulers_toggled(on: bool) -> void :
+-    input.show_rulers = not on
+-    input.queue_redraw()
++	input.show_rulers = not on
++	input.queue_redraw()
+ 
+ func _is_ortho_toggled(on: bool) -> void :
+-    voxel_scene.set_ortho(on)
+-    input.queue_redraw()
++	voxel_scene.set_ortho(on)
++	input.queue_redraw()
+ 
+ func _reset_scene_pressed() -> void :
+-    voxel_scene.clear_clip()
++	voxel_scene.clear_clip()
+diff --git a/mods/ExampleMod.zip b/mods/ExampleMod.zip
+new file mode 100644
+index 0000000000000000000000000000000000000000..7f3221cc99ea77efd491bee973a52a00a3da6a96
+GIT binary patch
+literal 869
+zcmWIWW@h1H00EVGO;Liz8yiJ{Y!K!KV&BBfJiYW3z0%ASAhOcePfkk8Ov^1xGtM%q
+zNahLvY6dCgU}&pqic;MC@qP}FHywxtfjBomB|bMXFEcH*xI{0jI6rUovqvGPd;&KG
+z1r)9IIHP;Q^Xpmvz)Or=&s3i+Q{vP<a3naWdvdoCx0li9&kmRRD!En$i0=HU$(8xj
+zmCJD@tL4m-OFdU6e0BZ#Q&pkWb>-2pU%wnokN)DA{pFxnk+AW>w4Y3wd%uXNu8Y!R
+zKse16=r5UD%X=*u85kBaF)*+Lod)$+>qNu+Lk0q^>CeMsY*iO|m8&dU71VxdE3?As
+zBjOug{ZP6c@M8UY%T}Q!N^bY}{=RqFSWc))_~Be0vA5^U6ZZOsS^w@$HPv-doOjZ_
+zD8l?nutNCz+%4Jd2F)U66*m`Ow=pw+mTH=onH=IAyL_)^s=HdE&nLkmhO*YpIycf*
+z&xu>Sy7Yc=z*LI@&G?I!P5fNv9Hdt?Pj7x#)n07GziCz8Zx^$`bH|o^O76JA{#vq9
+zu}A8}7N<YoiY%q8c8Y)Oz3QNAajDJwWclT#=XXqVs;j!I7|m$CYUj7A=7skjoN#<&
+z%Dr{F?sVqO|65+|(ermW)_r;D!5b{M)xGESFJ1o8Wz&gm^<RDo_vb|Am+Cx?Fnc0!
+zeZ}XCkGytj9l7f_E%V}p#Rk^T{{N0Tc~bM6i{8Apvsqk4Mu)<V@&|Y`GRZUGN;fLN
+z5C#DSFbNNBP%7er3NkWCFnqWjTBNw-Hsdc-(Vv<?`bsZ^4>259x<WSG7H9!RDnquy
+zw>R*?@5Q$n=bXA52C`xo^Tx_=Kt8e+nCS!AiW@*Hps5AfU^S8Q=^(eCVwwwfyPf#6
+Zd=Njto0SdZYi1yn1SU8$V1i>{001{>IM)CG
+
+literal 0
+HcmV?d00001
+
+diff --git a/mods/ExampleMod/Main.gd b/mods/ExampleMod/Main.gd
+new file mode 100644
+index 0000000..3c9045a
+--- /dev/null
++++ b/mods/ExampleMod/Main.gd
+@@ -0,0 +1,21 @@
++extends Node
++func initialize():
++	
++	Console.control.visible = true
++	Console.enabled = true
++	Console.enable()
++	
++	Console.add_command("modtest", func(): Console.rich_label.append_text("Hello World from ExampleMod!"))
++	Console.add_command("mods", _list_mods)
++	
++	print("ExampleMod initialized!")
++	
++func _list_mods():
++	Console.rich_label.append_text("List of loaded mods:\n")
++	for modname in Mod_Manager.get_mods():
++		var manifest = Mod_Manager.get_mod_manifest(modname)
++		
++		var description = "no description"
++		if manifest.keys().has("description"):
++			description = manifest["description"]
++		Console.rich_label.append_text("\t[color=yellow]"+modname+"[/color]: "+description)
+diff --git a/mods/ExampleMod/mod_manifest.json b/mods/ExampleMod/mod_manifest.json
+new file mode 100644
+index 0000000..9ed5301
+--- /dev/null
++++ b/mods/ExampleMod/mod_manifest.json
+@@ -0,0 +1,7 @@
++{
++	"id": "ExampleMod",
++	"name": "Example Mod",
++	"description": "An example mod for Replicube",
++	"root": "res://mods/ExampleMod/",
++	"main": "Main.gd"
++}

@@ -37,7 +37,7 @@ If the game runs, open the console using the keybind **" ' "** (Apostrophe key, 
 
 Check if yours mods is running by running the command **"mods"** on console.
 
-***(The mods of the games are on the mods/ folder inside the project folder!)***
+***(The mods for the game are on the "mods/" folder inside the project folder!)***
 
 And if yours mods are all listed, than you are okay to go!
 

@@ -39,7 +39,7 @@ Check if yours mods is running by running the command **"mods"** on console.
 
 And if yours mods are all listed, than you are okay to go!
 
-***(If your project on godot get any errors, contact geleiacompepino(me :) ) on Walaber Discord, I will help you fix!)***
+***(If your project on godot get any errors, contact geleiacompepino( me :) ) on Walaber Discord, I will help you fix!)***
 
 ## 🛠 Issues, Suggestions, and Support
 

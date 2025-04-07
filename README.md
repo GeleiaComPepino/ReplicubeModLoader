@@ -63,10 +63,11 @@ This project is licensed under the **GNU General Public License (GPL)**. This en
 
 ## Creators
 
-Originally created by GeleiaComPepino and Gyro(gyro3630), but now maintained by GeleiaComPepino!
+Originally created by GeleiaComPepino and Gyro(gyro3630)!
 </br>
 </br>
 ![GeleiaComPepino logo](https://images.weserv.nl/?url=cdn.discordapp.com/avatars/869411520382111795/c203b2ef2ba4094e8bdfafe39e164215?v=4&h=100&w=100&fit=cover&mask=circle&maxage=7d)
+![Gyro logo](https://images.weserv.nl/?url=https://cdn.discordapp.com/avatars/880412750684241940/34c8cd7d7159b54d2e415c67b2c517ff?v=4&h=100&w=100&fit=cover&mask=circle&maxage=7d)
 </a>
 </br>
 </br>

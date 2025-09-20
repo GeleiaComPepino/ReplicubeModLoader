@@ -67,7 +67,7 @@ Originally created by GeleiaComPepino and Gyro(gyro3630)!
 </br>
 </br>
 ![GeleiaComPepino logo](https://github.com/GeleiaComPepino.png)
-![Gyro logo](https://github.com/gyro3630.png)
+![Gyro logo](https://github.com/MathiasDPX.png)
 </a>
 </br>
 </br>

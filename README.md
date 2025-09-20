@@ -66,8 +66,8 @@ This project is licensed under the **GNU General Public License (GPL)**. This en
 Originally created by GeleiaComPepino and Gyro(gyro3630)!
 </br>
 </br>
-![GeleiaComPepino logo](https://github.com/GeleiaComPepino.png)
-![Gyro logo](https://github.com/MathiasDPX.png)
+![GeleiaComPepino logo](https://github.com/GeleiaComPepino.png?size=200)
+![Gyro logo](https://github.com/MathiasDPX.png?size=200)
 </a>
 </br>
 </br>
